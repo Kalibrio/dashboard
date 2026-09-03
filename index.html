@@ -100,6 +100,16 @@
   .card .num .a { color: var(--ink-strong); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .card .num .b { font-size: 0.8rem; color: var(--ink-dim); white-space: nowrap; }
   .card .num .a.pos { color: var(--green-text); } .card .num .a.negv { color: var(--neg); } .card .num .a.dim { color: var(--ink-dim); font-weight: 500; }
+  .sqi { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-left: 8px; vertical-align: 1px; }
+  .sqi.green { background: var(--green); } .sqi.red { background: var(--neg); }
+  .card .num .a.badge { padding: 5px 10px; border-radius: 8px; }
+  .card .num .a.badge.green { background: var(--green-soft); color: var(--green-text); } .card .num .a.badge.red { background: var(--red-soft); color: var(--neg); }
+  .datebox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--card); border-radius: 12px; padding: 12px 14px; margin: -4px 0 16px; }
+  .datebox[hidden] { display: none; }
+  .datebox input { font: inherit; font-size: 0.95rem; color: var(--ink-strong); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; min-height: 44px; }
+  .datebox button { font: inherit; font-size: 0.95rem; font-weight: 600; color: #fff; background: var(--red); border: 0; border-radius: 8px; padding: 0 14px; min-height: 44px; cursor: pointer; }
+  .datebox .to { color: var(--ink-dim); font-size: 0.9rem; }
+  .chip svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px; }
   .pos { color: var(--green-text); font-weight: 600; } .negv { color: var(--neg); font-weight: 600; } .dim { color: var(--ink-dim); }
   .chev { width: 8px; height: 8px; border-right: 2px solid #c3c9d1; border-bottom: 2px solid #c3c9d1; transform: rotate(-45deg); flex: none; margin-right: 4px; }
   .win { background: var(--green-soft); border-radius: 12px; padding: 14px 16px; margin: 16px 0 0; display: flex; flex-direction: column; gap: 4px; }
@@ -455,11 +465,11 @@ function rail(items, selIdx, act) {
     `<button class="chip${i === selIdx ? ' sel' : ''}" data-act="${act}" data-i="${i}">${t}</button>`).join('') + `</div>`;
 }
 
-function cycleCard(c, { showDay = false } = {}) {
+function cycleCard(c, { showDay = false, badge = '' } = {}) {
   const pct = c.profit / c.amount * 100;
   return card({ href: `#/cycle/${c.id}`, title: cyclePath(c.cycle),
     sub: `${showDay ? fmtDayShort(c.ts) + ' ' : ''}${fmtTime(c.ts)}${c.exchange ? ` · ${esc(c.exchange)}` : ''} · ${money(c.amount)}${c.durationMs != null ? ` · ${dur(c.durationMs)}` : ''}`,
-    a: money(c.profit, { plus: true }), b: pct2(pct), acls: c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim' });
+    a: money(c.profit, { plus: true }), b: pct2(pct), acls: badge ? `badge ${badge}` : (c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim') });
 }
 
 function cycleRows(list, { showDay = false } = {}) {
@@ -511,7 +521,16 @@ const errBox = `<div class="err">Load failed</div>`;
 const DAY_CHIPS = () => [0, 1, 2, 3, 4, 5, 6].map(dayLabel);
 const RANGE_CHIPS = ['Last 7 days', 'Last 14 days', 'Last 30 days', 'Last 60 days', 'Last 90 days', 'Last 180 days'];
 const RANGE_DAYS = [7, 14, 30, 60, 90, 180];
-const state = { dayIdx: 0, rangeIdx: 2, exch: {} };
+const state = { dayIdx: 0, rangeIdx: 2, exch: {}, custom: null, pickOpen: false };
+const CAL_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2"></rect><path d="M2 7h12M5 1.5v3M11 1.5v3"></path></svg>';
+const isoDay = ts => { const d = new Date(ts); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+function dayRail() {
+  const c = state.custom;
+  const label = c ? (c.to - c.from <= DAY ? fmtDay(c.from + DAY / 2) : `${fmtDayShort(c.from + DAY / 2)} – ${fmtDayShort(c.to - DAY / 2)}`) : 'Pick dates';
+  return `<div class="rail">` + DAY_CHIPS().map((t, i) => `<button class="chip${!c && i === state.dayIdx ? ' sel' : ''}" data-act="day" data-i="${i}">${t}</button>`).join('')
+    + `<button class="chip${c ? ' sel' : ''}" data-act="pickdate">${CAL_ICON}${label}</button></div>`
+    + `<div class="datebox" id="datebox"${state.pickOpen ? '' : ' hidden'}><input type="date" id="dfrom" value="${c ? isoDay(c.from) : ''}" aria-label="From"><span class="to">to</span><input type="date" id="dto" value="${c ? isoDay(c.to - DAY) : ''}" aria-label="To (optional)"><button type="button" id="dapply">Show</button></div>`;
+}
 
 function exchanges() { return [...new Set(DATA.cycles.map(c => c.exchange).filter(Boolean))]; }
 
@@ -545,25 +564,29 @@ function viewStatus() {
 
 function viewDay() {
   const idx = state.dayIdx;
-  const f = startOfDay(idx);
-  const list = inRange(f, f + DAY);
-  const s = stats(list, 1);
-  const base = dailyProfits(30 + idx).slice(0, 30);
+  const c = state.custom;
+  const f = c ? c.from : startOfDay(idx);
+  const t = c ? c.to : f + DAY;
+  const days = Math.max(1, Math.round((t - f) / DAY));
+  const list = inRange(f, t);
+  const s = stats(list, days);
+  const base = dailyProfits(30 + (c ? 0 : idx)).slice(0, 30);
   const avg = base.reduce((a, d) => a + d.v, 0) / 30;
+  const title = c ? (days === 1 ? fmtDay(f + DAY / 2) : `${fmtDay(f + DAY / 2)} – ${fmtDay(t - DAY / 2)}`) : dayLabel(idx);
   const gains = list.filter(c => c.profit >= 0).sort((a, b) => b.profit - a.profit).slice(0, 5);
   const losses = list.filter(c => c.profit < 0).sort((a, b) => a.profit - b.profit).slice(0, 5);
 
-  const hero = `<div class="eyebrow">${dayLabel(idx)} · Total net profit</div>
-    <div class="hero"><div class="n">${money(s.profit)}</div><div class="pills">${deltaPill(s.profit, avg, `vs 30-day avg ${money(avg)}`)}<span class="pill">${pct2(s.profitPct)} of capital</span></div></div>`;
+  const hero = `<div class="eyebrow">${title} · Total net profit${days > 1 ? ` · ${days} days` : ''}</div>
+    <div class="hero"><div class="n">${money(s.profit)}</div><div class="pills">${days > 1 ? deltaPill(s.profit / days, avg, `per day vs 30-day avg ${money(avg)}`) : deltaPill(s.profit, avg, `vs 30-day avg ${money(avg)}`)}<span class="pill">${pct2(s.profitPct)} of capital</span></div></div>`;
   const tiles = `<div class="tiles">
     ${tile('Win rate', s.n ? pct0(s.winrate) : '—', { txt: `${s.wins} won · ${s.n - s.wins} lost` })}
     ${tile('Cycles', s.n, { txt: `${money(s.volume)} volume` })}
-    ${tile('Gains', money(s.gain), { txt: `top 5 made ${pct0(s.topGainShare)}` }, '', 'Total Gain')}
-    ${tile('Losses', money(s.loss), { txt: `top 5 made ${pct0(s.topLossShare)}` }, '', 'Total Loss')}
+    ${tile('Gains', money(s.gain) + '<span class="sqi green"></span>', { txt: `top 5 made ${pct0(s.topGainShare)}` }, '', 'Total Gain')}
+    ${tile('Losses', money(s.loss) + '<span class="sqi red"></span>', { txt: `top 5 made ${pct0(s.topLossShare)}` }, '', 'Total Loss')}
   </div>`;
-  const lists = `<h2>Top earners</h2><div class="list">${gains.map(c => cycleCard(c)).join('') || card({ title: 'No winning cycles', sub: '' })}</div>
-    <h2>Top losers</h2><div class="list">${losses.map(c => cycleCard(c)).join('') || card({ title: 'No losing cycles', sub: '' })}</div>`;
-  return rail(DAY_CHIPS(), idx, 'day') + (LOAD_FAILED ? errBox : '')
+  const lists = `<h2>Top earners</h2><div class="list">${gains.map(x => cycleCard(x, { showDay: days > 1, badge: 'green' })).join('') || card({ title: 'No winning cycles', sub: '' })}</div>
+    <h2>Top losers</h2><div class="list">${losses.map(x => cycleCard(x, { showDay: days > 1, badge: 'red' })).join('') || card({ title: 'No losing cycles', sub: '' })}</div>`;
+  return dayRail() + (LOAD_FAILED ? errBox : '')
     + `<div class="layout two"><div>${hero}${tiles}</div><div>${lists}</div></div>`;
 }
 
@@ -697,9 +720,17 @@ document.getElementById('view').addEventListener('click', e => {
   if (dd) { state.dayIdx = +dd.dataset.day; return; }
   const ex = e.target.closest('button[data-exch]');
   if (ex) { state.exch[ex.dataset.exch] = state.exch[ex.dataset.exch] === false; render(); return; }
+  if (e.target.closest('#dapply')) {
+    const from = document.getElementById('dfrom').value, to = document.getElementById('dto').value || from;
+    if (!from) return;
+    const f = new Date(from + 'T00:00:00').getTime(), t = new Date(to + 'T00:00:00').getTime() + DAY;
+    if (t <= f) return;
+    state.custom = { from: f, to: t }; state.pickOpen = false; render(); return;
+  }
   const b = e.target.closest('.chip');
   if (!b) return;
-  if (b.dataset.act === 'day') state.dayIdx = +b.dataset.i;
+  if (b.dataset.act === 'pickdate') { state.pickOpen = !state.pickOpen; render(); if (state.pickOpen) { const i = document.getElementById('dfrom'); if (i) i.focus(); } return; }
+  if (b.dataset.act === 'day') { state.dayIdx = +b.dataset.i; state.custom = null; state.pickOpen = false; }
   else state.rangeIdx = +b.dataset.i;
   render();
 });
