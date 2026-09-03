@@ -10,6 +10,7 @@
   :root {
     --bg:        #ffffff;
     --card:      #f7f8fa;
+    --card-2:    #eef1f5;
     --ink:       #3d4b5c;
     --ink-strong:#33404f;
     --ink-dim:   #8a94a3;
@@ -18,133 +19,146 @@
     --red-soft:  #fdeeea;
     --red-text:  #e05c3f;
     --green:     #7cc142;
+    --green-text:#4d9427;
+    --green-soft:#eef7e6;
+    --amber:     #e8912d;
+    --amber-text:#a86a12;
+    --amber-soft:#fbf1e1;
     --orange:    #e8912d;
     --neg:       #d8382e;
     --link:      #2f6fd0;
+    --link-soft: #eaf1fb;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    background: var(--bg);
-    color: var(--ink);
+    background: var(--bg); color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 17px;
-    line-height: 1.45;
+    font-size: 17px; line-height: 1.45;
   }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 18px 20px 60px; }
-
-  /* Header */
-  header { display: flex; align-items: center; justify-content: flex-end; padding: 6px 0 14px; }
-  .burger {
-    background: none; border: 0; cursor: pointer; padding: 8px 2px;
-    display: flex; flex-direction: column; gap: 5px;
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 20px 60px; }
+  a { color: var(--link); text-decoration: none; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 0 10px; }
+  header h1 { font-size: 1.55rem; font-weight: 700; color: var(--ink-strong); letter-spacing: -0.01em; }
+  header .clock { font-size: 0.85rem; color: var(--ink-dim); white-space: nowrap; }
+  /* Primary navigation: a scrolling chip rail on phones, tabs on wide screens */
+  nav.nav { display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 0 -20px 16px; padding: 2px 20px 6px; }
+  nav.nav::-webkit-scrollbar { display: none; }
+  nav.nav a { flex: none; padding: 10px 14px; border-radius: 10px; color: var(--ink-strong); font-weight: 500; }
+  nav.nav a.current { background: var(--red); color: #fff; }
+  @media (min-width: 900px) {
+    nav.nav { margin: 0 0 22px; padding: 0; border-bottom: 1px solid var(--line); gap: 2px; }
+    nav.nav a { border-radius: 0; padding: 12px 16px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    nav.nav a.current { background: none; color: var(--ink-strong); border-bottom-color: var(--red); }
   }
-  .burger span { display: block; width: 26px; height: 2.5px; background: var(--ink-strong); border-radius: 2px; }
-
-  /* Menu card */
-  .menu { background: var(--card); border-radius: 12px; padding: 14px 0; margin-bottom: 20px; }
-  .menu[hidden] { display: none; }
-  .menu a { display: block; padding: 12px 34px; color: var(--ink); text-decoration: none; font-size: 1.15rem; }
-  .menu a:active, .menu a.current { color: var(--ink-strong); font-weight: 500; }
-
-  /* Chips */
-  .chips { display: flex; flex-wrap: wrap; row-gap: 8px; column-gap: 4px; margin: 4px 0 22px; }
-  .chip {
-    background: none; border: 0; cursor: pointer; font: inherit; color: var(--ink-strong);
-    padding: 10px 18px; border-radius: 10px; white-space: nowrap;
-  }
-  .chip.sel { background: var(--red); color: #fff; }
-
-  h2 { font-size: 1.35rem; font-weight: 600; color: var(--ink-dim); margin: 26px 0 4px; }
-
-  /* Key/value summary table */
+  /* Period rail */
+  .rail { display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 0 -20px 14px; padding: 2px 20px 6px; }
+  .rail::-webkit-scrollbar { display: none; }
+  .chip { flex: none; background: none; border: 0; cursor: pointer; font: inherit; font-size: 0.95rem; color: var(--ink-strong); padding: 11px 14px; border-radius: 10px; white-space: nowrap; }
+  .chip.sel { background: var(--card-2); color: var(--ink-strong); font-weight: 600; }
+  .chip.on { background: var(--link-soft); color: var(--link); }
+  .eyebrow { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-dim); font-weight: 600; }
+  .hero { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 4px; }
+  .hero .n { font-size: 46px; font-weight: 700; color: var(--ink-strong); letter-spacing: -0.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .hero .n small { font-size: 22px; font-weight: 600; color: var(--ink-dim); letter-spacing: 0; margin-left: 2px; }
+  .hero .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pill { display: inline-block; font-size: 0.8rem; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--card-2); color: #6b7684; }
+  .pill.amber { background: var(--amber-soft); color: var(--amber-text); }
+  .pill.green { background: var(--green-soft); color: var(--green-text); }
+  .pill.red { background: var(--red-soft); color: var(--red); }
+  .spark { display: block; width: 100%; height: 64px; margin-top: 8px; }
+  .axis { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--ink-dim); margin-top: 2px; }
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 16px 0 6px; }
+  @media (min-width: 640px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .tile { background: var(--card); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tile .l { font-size: 0.8rem; color: var(--ink-dim); line-height: 1.25; }
+  .tile .v { font-size: 1.25rem; font-weight: 600; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+  .tile .v small { font-size: 0.85rem; font-weight: 500; color: var(--ink-dim); }
+  .tile .d { font-size: 0.78rem; color: var(--ink-dim); }
+  .tile .d.up { color: var(--green-text); } .tile .d.down { color: var(--amber-text); } .tile .d.bad { color: var(--neg); }
+  .tile.red .v { color: var(--red); } .tile.amber .v { color: var(--amber-text); } .tile.dim .v { color: var(--ink-dim); }
+  h2 { font-size: 1.05rem; font-weight: 700; color: var(--ink-strong); margin: 26px 0 6px; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  h2 a { font-size: 0.9rem; font-weight: 500; padding: 8px 0; }
+  h2 .i { vertical-align: 2px; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 40px; }
+  @media (min-width: 900px) { .layout.two { grid-template-columns: 1.2fr 1fr; } .layout.three { grid-template-columns: 1.2fr 1fr 1fr; gap: 0 32px; } }
   .kv { width: 100%; }
-  .kv .row {
-    display: flex; align-items: baseline; gap: 16px;
-    padding: 20px 2px; border-bottom: 1px solid var(--line);
-  }
-  .kv .k { color: var(--ink-strong); flex: 0 0 42%; }
-  .kv .v { color: var(--ink-strong); flex: 1; }
-  .sq {
-    display: inline-block; width: 14px; height: 14px; border-radius: 2.5px;
-    vertical-align: -1px; margin-right: 8px; flex: none;
-  }
-  .sq.up   { background: var(--green); }
-  .sq.down { background: var(--neg); }
-  .sq.loss { background: var(--orange); }
-
-  /* Data tables */
-  .tblwrap { overflow-x: auto; margin: 8px 0 26px; }
+  .kv .row { display: flex; align-items: baseline; gap: 16px; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+  .kv .k { color: var(--ink-dim); flex: 0 0 42%; font-size: 0.95rem; }
+  .kv .v { color: var(--ink-strong); flex: 1; font-variant-numeric: tabular-nums; }
+  .list { display: flex; flex-direction: column; }
+  .card { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); min-height: 60px; color: inherit; }
+  a.card:hover { background: var(--card); }
+  .card.alert { background: var(--red-soft); border-radius: 12px; padding: 12px 14px; border: 0; margin-bottom: 6px; }
+  .card.good { background: var(--green-soft); border-radius: 12px; padding: 12px 14px; border: 0; margin-bottom: 6px; }
+  .hd { width: 9px; height: 9px; border-radius: 50%; flex: none; background: #c3c9d1; }
+  .hd.red { background: var(--neg); } .hd.amber { background: var(--amber); } .hd.green { background: var(--green); } .hd.grey { background: #c3c9d1; } .hd.blue { background: var(--link); }
+  .card .body { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .card .t { color: var(--ink-strong); font-weight: 600; }
+  .card .s { font-size: 0.85rem; color: var(--ink-dim); }
+  .card .num { text-align: right; display: flex; flex-direction: column; gap: 1px; align-items: flex-end; flex: none; }
+  .card .num .a { color: var(--ink-strong); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .card .num .b { font-size: 0.8rem; color: var(--ink-dim); white-space: nowrap; }
+  .pos { color: var(--green-text); font-weight: 600; } .negv { color: var(--neg); font-weight: 600; } .dim { color: var(--ink-dim); }
+  .chev { width: 8px; height: 8px; border-right: 2px solid #c3c9d1; border-bottom: 2px solid #c3c9d1; transform: rotate(-45deg); flex: none; margin-right: 4px; }
+  .win { background: var(--green-soft); border-radius: 12px; padding: 14px 16px; margin: 16px 0 0; display: flex; flex-direction: column; gap: 4px; }
+  .win .eyebrow { color: var(--green-text); }
+  .win .big { font-size: 1.35rem; font-weight: 700; color: var(--ink-strong); }
+  .win .sub { font-size: 0.9rem; color: #4a5665; }
+  .win button.link, button.link { background: none; border: 0; padding: 10px 0 2px; font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--link); cursor: pointer; text-align: left; }
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 120px; margin-top: 10px; }
+  .bar { flex: 1; min-width: 0; background: #dbe6f7; border-radius: 3px 3px 0 0; position: relative; }
+  .bar.hi { background: var(--link); } .bar.lo { background: #f0d2a3; } .bar.neg { background: #f3c4c0; } .bar.today { background: var(--card-2); border: 1px dashed #c3c9d1; }
+  .bx { display: flex; gap: 4px; margin-top: 6px; } .bx span { flex: 1; min-width: 0; text-align: center; font-size: 0.7rem; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tblwrap { overflow-x: auto; margin: 8px 0 20px; }
   table.data { width: 100%; border-collapse: collapse; }
-  table.data th {
-    background: var(--card); color: var(--ink-dim); font-size: 0.78rem; font-weight: 600;
-    letter-spacing: 0.08em; text-transform: uppercase; text-align: left; padding: 14px 12px;
-    white-space: nowrap;
-  }
-  table.data td { padding: 18px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; color: var(--ink-strong); }
-  table.data a { color: var(--link); text-decoration: none; }
-  table.data td.pair { letter-spacing: 0.02em; }
-
-  /* Week horizontal table */
-  table.week th { text-align: left; }
-  table.week td .cell { display: flex; align-items: center; gap: 0; }
-
-  /* Trading-log extras */
-  .filters { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 4px 0 14px; }
-  .filters label { display: inline-flex; align-items: center; gap: 7px; font-size: 0.95rem; color: var(--ink-strong); }
-  .filters input { width: 17px; height: 17px; accent-color: var(--link); }
-  .dl { color: var(--link); text-decoration: none; font-size: 0.95rem; margin-left: auto; }
-  .sumbox {
-    background: var(--card); border-radius: 8px; padding: 12px 16px; margin: 0 0 16px;
-    font-size: 0.9rem; color: var(--ink-strong); line-height: 1.55; display: inline-block;
-  }
-  .sq.warn { background: #e8c22d; }
-  .sq.exp  { background: #35b96b; }
-
-  /* Metric definition overlay */
+  table.data th { background: var(--card); color: var(--ink-dim); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; padding: 12px 10px; white-space: nowrap; }
+  table.data td { padding: 12px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; color: var(--ink-strong); font-variant-numeric: tabular-nums; }
+  table.data td.r, table.data th.r { text-align: right; }
+  table.data th[data-csort] { cursor: pointer; user-select: none; }
+  table.data th .arr { margin-left: 5px; color: var(--ink-strong); }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 4px 0 12px; }
+  .dl { color: var(--link); font-size: 0.9rem; margin-left: auto; padding: 8px 0; }
+  .group { border-bottom: 1px solid var(--line); }
+  .group > summary { list-style: none; cursor: pointer; }
+  .group > summary::-webkit-details-marker { display: none; }
+  .group[open] > summary .chev { transform: rotate(45deg); }
+  .group .inner { padding: 0 0 8px 21px; }
+  .chat { margin: 10px 0 20px; }
+  .chat .msg { max-width: 82%; margin: 7px 0; padding: 9px 14px; border-radius: 12px; font-size: 0.95rem; }
+  .chat .msg .who { display: block; font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 2px; }
+  .chat .ai  { background: var(--card); border-bottom-left-radius: 4px; }
+  .chat .fan { background: var(--link-soft); margin-left: auto; border-bottom-right-radius: 4px; }
+  .chat .sale { text-align: center; font-size: 0.9rem; font-weight: 600; margin: 14px 0; background: var(--green-soft); color: var(--green-text); border: 1px solid #cde8b8; padding: 10px 12px; border-radius: 8px; }
+  .chat .offer { text-align: center; font-size: 0.85rem; margin: 12px 0; padding: 8px 12px; border-radius: 8px; }
+  .chat .offer.buy  { background: var(--green-soft); color: var(--green-text); }
+  .chat .offer.miss { background: var(--red-soft); color: var(--red-text); }
+  .fold[hidden] { display: none; }
   button.i {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 16px; height: 16px; padding: 0; margin-left: 7px; vertical-align: 1px;
-    border: 1px solid var(--ink-dim); border-radius: 50%; background: none;
-    color: var(--ink-dim); font: italic 600 11px Georgia, serif; cursor: pointer;
+    width: 15px; height: 15px; padding: 0; margin-left: 6px; vertical-align: 1px;
+    border: 1px solid #c3c9d1; border-radius: 50%; background: none;
+    color: var(--ink-dim); font: italic 600 10px Georgia, serif; cursor: pointer;
   }
-  .scrim {
-    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.35);
-    display: flex; align-items: center; justify-content: center; padding: 24px;
-  }
-  .defcard {
-    background: #fff; border-radius: 14px; padding: 22px 24px; max-width: 420px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  }
+  .scrim { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .defcard { background: #fff; border-radius: 14px; padding: 22px 24px; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
   .defcard h3 { font-size: 1.05rem; color: var(--ink-strong); margin-bottom: 8px; }
   .defcard p { font-size: 0.95rem; color: var(--ink); line-height: 1.55; }
-
-  /* Error state */
-  .err {
-    background: var(--red-soft); color: var(--red-text); border-radius: 10px;
-    padding: 18px 20px; margin: 10px 0 24px;
-  }
-  .hint { color: var(--ink-dim); font-size: 0.85rem; margin-top: 30px; }
-  .hint code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; }
-  .back { display: inline-block; margin: 4px 0 10px; color: var(--link); text-decoration: none; }
-
-  .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 8px; }
+  .err { background: var(--red-soft); color: var(--red-text); border-radius: 10px; padding: 14px 16px; margin: 10px 0 20px; }
+  .back { display: inline-block; margin: 4px 0 6px; color: var(--link); padding: 8px 0; }
+  .status-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--green); margin-right: 6px; vertical-align: 0; }
+  .running { color: var(--green-text); font-weight: 600; }
+  .note { font-size: 0.85rem; color: var(--ink-dim); margin: 10px 0; }
+  .sentence { font-size: 1.05rem; color: var(--ink-strong); line-height: 1.5; margin: 8px 0 4px; }
+  .sentence b { font-weight: 700; }
+  @media (max-width: 639px) { .desk { display: none !important; } }
+  @media (min-width: 640px) { .mob { display: none !important; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </header>
-
-  <nav class="menu" id="menu" hidden>
-    <a href="#/status">Status</a>
-    <a href="#/day">Metrics/Day</a>
-    <a href="#/week">Metrics/Week</a>
-    <a href="#/cycles">Cycles</a>
-  </nav>
+  <header><h1>Dashboard</h1><span class="clock" id="clock"></span></header>
+  <nav class="nav" id="nav" aria-label="Sections"></nav>
 
   <main id="view"></main>
 
@@ -351,125 +365,252 @@ function cyclesTable(list, { firstCol } = {}) {
     </tr>`).join('') + `</tbody></table></div>`;
 }
 
-const errBox = `<div class="err">Load failed</div>`;
+/* ---------- format helpers ---------- */
 
-/* ---------- views ---------- */
-
-const DAY_CHIPS = ['Today', 'Yesterday', '2 days ago', '3 days ago', '4 days ago', '5 days ago', '6 days ago'];
-const RANGE_CHIPS = ['Last 1 Day', 'Last 3 Days', 'Last 7 Days', 'Last 14 Days', 'Last 30 Days', 'Last 60 Days', 'Last 90 Days', 'Last 180 Days'];
-const RANGE_DAYS = [1, 3, 7, 14, 30, 60, 90, 180];
-
-const state = { dayIdx: 0, rangeIdx: 4, exch: {} };
-
+const money = (n, opts = {}) => {
+  const sign = n < 0 ? '−' : (opts.plus && n > 0 ? '+' : '');
+  const a = Math.abs(n);
+  const s = a >= 1000
+    ? a.toLocaleString('en-US', { maximumFractionDigits: 0 })
+    : a.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${sign}$${s}`;
+};
+const pct0 = n => `${Math.round(n)}%`;
+const pct2 = n => `${n < 0 ? '−' : ''}${Math.abs(n).toFixed(2)}%`;
+const fmtTime = ts => new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+const fmtDay = ts => new Date(ts).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+const fmtDayShort = ts => new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const fmtDate = ts => new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function ago(ts) {
+  const m = Math.max(0, Math.round((Date.now() - ts) / 60000));
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} h ago`;
+  return `${Math.floor(h / 24)} d ago`;
+}
 function startOfDay(offset) {
   const d = new Date(); d.setHours(0, 0, 0, 0);
   return d.getTime() - offset * DAY;
 }
+function dayLabel(off) {
+  if (off === 0) return 'Today';
+  if (off === 1) return 'Yesterday';
+  return fmtDay(startOfDay(off) + DAY / 2);
+}
+const dur = ms => ms == null ? '—' : ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`;
+const cyclePath = c => esc(String(c).split('-').join(' · '));
+
+function deltaPill(cur, base, label, opts = {}) {
+  if (!(Math.abs(base) > 0)) return `<span class="pill">no baseline yet</span>`;
+  const r = (cur - base) / Math.abs(base) * 100;
+  const txt = `${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.round(Math.abs(r))}% ${label}`;
+  if (Math.abs(r) < 5) return `<span class="pill">in line · ${label}</span>`;
+  const good = opts.lowerIsBetter ? r < 0 : r > 0;
+  const cls = good ? 'green' : (Math.abs(r) >= 25 ? 'red' : 'amber');
+  return `<span class="pill ${cls}">${txt}</span>`;
+}
+function deltaText(cur, base) {
+  if (!(Math.abs(base) > 0)) return { txt: '—', cls: '' };
+  const r = (cur - base) / Math.abs(base) * 100;
+  if (Math.abs(r) < 5) return { txt: 'in line', cls: '' };
+  return { txt: `${r > 0 ? '+' : '−'}${Math.round(Math.abs(r))}%`, cls: r > 0 ? 'up' : (r <= -25 ? 'bad' : 'down') };
+}
+
+function sparkline(pts, { avg = null, color = '#2f6fd0', h = 64 } = {}) {
+  if (pts.length < 2) return '';
+  const w = 400, max = Math.max(...pts, avg == null ? -Infinity : avg), min = Math.min(...pts, avg == null ? Infinity : avg);
+  const x = k => (k / (pts.length - 1)) * w;
+  const y = v => h - 6 - ((v - min) / (max - min || 1)) * (h - 14);
+  const d = pts.map((v, k) => `${k ? 'L' : 'M'}${x(k).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+  const avgLine = avg != null ? `<line x1="0" y1="${y(avg).toFixed(1)}" x2="${w}" y2="${y(avg).toFixed(1)}" stroke="#c3c9d1" stroke-width="1" stroke-dasharray="3 3"></line>` : '';
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <path d="${d} L${w} ${h} L0 ${h} Z" fill="${color}" fill-opacity="0.12"></path>${avgLine}
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"></path>
+    <circle cx="${w}" cy="${y(pts[pts.length - 1]).toFixed(1)}" r="3.5" fill="${color}"></circle></svg>`;
+}
+
+function barChart(items, avg) {
+  const max = Math.max(...items.map(i => Math.abs(i.value)), 1);
+  const best = Math.max(...items.filter(i => !i.today).map(i => i.value));
+  return `<div class="bars">` + items.map(i => {
+    const hpct = Math.max(4, Math.abs(i.value) / max * 100);
+    const cls = i.today ? 'today' : i.value < 0 ? 'neg' : i.value === best ? 'hi' : (avg != null && i.value < avg) ? 'lo' : '';
+    return `<div class="bar ${cls}" style="height:${hpct.toFixed(1)}%" title="${esc(i.label)}: ${money(i.value)}"></div>`;
+  }).join('') + `</div>` + (items.length <= 14 ? `<div class="bx">` + items.map(i => `<span>${esc(i.label)}</span>`).join('') + `</div>` : `<div class="axis"><span>${esc(items[0].label)}</span><span>${esc(items[items.length - 1].label)}</span></div>`);
+}
+
+const tile = (label, value, delta, cls = '', defKey) =>
+  `<div class="tile ${cls}"><div class="l">${infoLabel(defKey || label)}</div><div class="v">${value}</div>${delta ? `<div class="d ${delta.cls || ''}">${delta.txt}</div>` : ''}</div>`;
+
+function card({ href, hd, title, sub, a, b, acls = '', cls = '' }) {
+  const tag = href ? 'a' : 'div';
+  return `<${tag}${href ? ` href="${href}"` : ''} class="card ${cls}">${hd ? `<span class="hd ${hd}"></span>` : ''}<div class="body"><div class="t">${title}</div>${sub ? `<div class="s">${sub}</div>` : ''}</div>${a != null ? `<div class="num"><div class="a ${acls}">${a}</div>${b ? `<div class="b">${b}</div>` : ''}</div>` : ''}${href ? '<span class="chev"></span>' : ''}</${tag}>`;
+}
+
+function rail(items, selIdx, act) {
+  return `<div class="rail">` + items.map((t, i) =>
+    `<button class="chip${i === selIdx ? ' sel' : ''}" data-act="${act}" data-i="${i}">${t}</button>`).join('') + `</div>`;
+}
+
+function cycleCard(c, { showDay = false } = {}) {
+  const pct = c.profit / c.amount * 100;
+  return card({ href: `#/cycle/${c.id}`, title: cyclePath(c.cycle),
+    sub: `${showDay ? fmtDayShort(c.ts) + ' ' : ''}${fmtTime(c.ts)}${c.exchange ? ` · ${esc(c.exchange)}` : ''} · ${money(c.amount)}${c.durationMs != null ? ` · ${dur(c.durationMs)}` : ''}`,
+    a: money(c.profit, { plus: true }), b: pct2(pct), acls: c.profit >= 0 ? 'pos' : 'negv' });
+}
+
+function cycleRows(list, { showDay = false } = {}) {
+  if (!list.length) return `<div class="list">${card({ title: 'No cycles', sub: '' })}</div>`;
+  const mob = `<div class="list mob">` + list.map(c => cycleCard(c, { showDay })).join('') + `</div>`;
+  const desk = `<div class="tblwrap desk"><table class="data">
+    <thead><tr>${['Time', 'Cycle', 'Exchange', 'Amount', 'Profit Expected (%)', 'Profit Actual (%)', 'Profit', 'Duration', 'Id'].map((h, i) => `<th class="${i >= 3 && i <= 7 ? 'r' : ''}">${infoLabel(h)}</th>`).join('')}</tr></thead>
+    <tbody>` + list.map(c => `<tr>
+      <td>${showDay ? fmtDayShort(c.ts) + ' ' : ''}${fmtTime(c.ts)}</td>
+      <td>${cyclePath(c.cycle)}</td>
+      <td>${esc(c.exchange || '—')}</td>
+      <td class="r">${money(c.amount)}</td>
+      <td class="r dim">${c.expectedPct != null ? pct2(c.expectedPct) : '—'}</td>
+      <td class="r">${pct2(c.profit / c.amount * 100)}</td>
+      <td class="r ${c.profit >= 0 ? 'pos' : 'negv'}">${money(c.profit, { plus: true })}</td>
+      <td class="r">${dur(c.durationMs)}</td>
+      <td><a href="#/cycle/${c.id}">${c.id}</a></td>
+    </tr>`).join('') + `</tbody></table></div>`;
+  return mob + desk;
+}
+
+/* Daily profit and closing balance for the last n complete days, oldest first. */
+function dailyProfits(n) {
+  const out = [];
+  for (let off = n; off >= 1; off--) {
+    const f = startOfDay(off);
+    const list = inRange(f, f + DAY);
+    const close = DATA.cycles.find(c => c.ts < f + DAY);
+    out.push({ off, f, v: list.reduce((a, c) => a + c.profit, 0), n: list.length, bal: close ? close.balanceAfter : null });
+  }
+  return out;
+}
+
+Object.assign(DEFS, {
+  'Balance': 'Account balance after the most recent cycle. The curve shows the closing balance of each of the last 30 days.',
+  'Return on capital': 'Current balance minus capital, as a share of capital.',
+  'Win rate': 'Share of cycles that closed with a positive result.',
+  'Cycles today': 'Cycles completed since midnight, against the average count reached by this time of day over the last 30 days.',
+  'Volume': 'Total amount committed across cycles in the period.',
+  'Best day': 'The most profitable day of the period.',
+  'Concentration': 'Share of total gains contributed by the five biggest winning cycles.',
+  'Capacity used': 'Committed amount as a share of the capacity the order books could absorb.'
+});
+
+const errBox = `<div class="err">Load failed</div>`;
+
+/* ---------- views ---------- */
+
+const DAY_CHIPS = () => [0, 1, 2, 3, 4, 5, 6].map(dayLabel);
+const RANGE_CHIPS = ['Last 7 days', 'Last 14 days', 'Last 30 days', 'Last 60 days', 'Last 90 days', 'Last 180 days'];
+const RANGE_DAYS = [7, 14, 30, 60, 90, 180];
+const state = { dayIdx: 0, rangeIdx: 2, exch: {} };
+
+function exchanges() { return [...new Set(DATA.cycles.map(c => c.exchange).filter(Boolean))]; }
+
+function viewStatus() {
+  const t0 = startOfDay(0);
+  const today = inRange(t0, t0 + DAY);
+  const s = stats(today, 1);
+  const last = DATA.cycles[0];
+  const current = last ? last.balanceAfter : DATA.capital;
+  const ret = DATA.capital ? (current - DATA.capital) / DATA.capital * 100 : 0;
+  const d30 = dailyProfits(30);
+  const s30 = stats(inRange(t0 - 30 * DAY, t0), 30);
+  const frac = Math.max(0.05, (Date.now() - t0) / DAY);
+  const avgCyclesByNow = s30.n / 30 * frac;
+  const equity = d30.map(d => d.bal).filter(b => b != null).concat([current]);
+
+  const hero = `<p class="note" style="margin:0 0 10px"><span class="running"><span class="status-dot"></span>Running</span>${last ? ` · last cycle ${fmtTime(last.ts)} · ${ago(last.ts)}` : ''}</p><div class="eyebrow">${infoLabel('Balance')}</div>
+    <div class="hero"><div class="n">${money(current)}</div>
+    <div class="pills"><span class="pill ${ret >= 0 ? 'green' : 'red'}">${ret >= 0 ? '+' : '−'}${Math.abs(ret).toFixed(1)}% on ${money(DATA.capital)} capital</span><span class="pill">${money(s.profit, { plus: true })} today</span></div></div>
+    ${sparkline(equity)}<div class="axis"><span>30 days ago</span><span>now</span></div>`;
+  const tiles = `<div class="tiles">
+    ${tile('Profit today', money(s.profit), { txt: `avg ${money(s30.dailyAvg)} · ${deltaText(s.profit, s30.dailyAvg).txt}`, cls: deltaText(s.profit, s30.dailyAvg).cls }, '', 'Profit Today')}
+    ${tile('Win rate', s.n ? pct0(s.winrate) : '—', { txt: `30-day ${pct0(s30.winrate)}`, cls: s.n ? deltaText(s.winrate, s30.winrate).cls : '' })}
+    ${tile('Cycles today', s.n, { txt: `avg ${Math.round(avgCyclesByNow)} by ${fmtTime(Date.now())}`, cls: deltaText(s.n, avgCyclesByNow).cls })}
+    ${tile('Volume', money(s.volume), { txt: `avg ${money(s30.volume / 30)} per day` })}
+  </div>`;
+  const list = `<h2>Today’s cycles<a href="#/cycles" data-day="0">All ${today.length}</a></h2>
+    <div class="list">${today.slice(0, 8).map(c => cycleCard(c)).join('') || card({ title: 'No cycles yet today', sub: '' })}</div>`;
+  return (LOAD_FAILED ? errBox : '') + `<div class="layout two"><div>${hero}${tiles}</div><div>${list}</div></div>`;
+}
 
 function viewDay() {
-  const from = startOfDay(state.dayIdx);
-  const list = inRange(from, from + DAY);
+  const idx = state.dayIdx;
+  const f = startOfDay(idx);
+  const list = inRange(f, f + DAY);
   const s = stats(list, 1);
+  const base = dailyProfits(30 + idx).slice(0, 30);
+  const avg = base.reduce((a, d) => a + d.v, 0) / 30;
   const gains = list.filter(c => c.profit >= 0).sort((a, b) => b.profit - a.profit).slice(0, 5);
   const losses = list.filter(c => c.profit < 0).sort((a, b) => a.profit - b.profit).slice(0, 5);
-  return chipRow(DAY_CHIPS, state.dayIdx, 'day')
-    + (LOAD_FAILED ? errBox : '')
-    + `<h2>Summary</h2><div class="kv">`
-    + kvRow('Total Profit', `${fmtUsd(s.profit)} usd (${fmtPct(s.profitPct)})`)
-    + kvRow('Winrate', fmtPct(s.winrate))
-    + kvRow('Cycles', s.n)
-    + kvRow('Total Gain', `${fmtUsd(s.gain)} usd (top 5 is ${fmtPct(s.topGainShare)})`)
-    + kvRow('Total Loss', `${fmtUsd(s.loss)} usd (top 5 is ${fmtPct(s.topLossShare)})`)
-    + kvRow('Total Volume', `${fmtUsd(s.volume)} usd`)
-    + `</div>`
-    + `<h2>Top Earners</h2>` + cyclesTable(gains, { firstCol: 'Top Earners' })
-    + `<h2>Top Losers</h2>` + cyclesTable(losses, { firstCol: 'Top Losers' });
+
+  const hero = `<div class="eyebrow">${dayLabel(idx)} · net profit</div>
+    <div class="hero"><div class="n">${money(s.profit)}</div><div class="pills">${deltaPill(s.profit, avg, `vs 30-day avg ${money(avg)}`)}<span class="pill">${pct2(s.profitPct)} of capital</span></div></div>`;
+  const tiles = `<div class="tiles">
+    ${tile('Win rate', s.n ? pct0(s.winrate) : '—', { txt: `${s.wins} won · ${s.n - s.wins} lost` })}
+    ${tile('Cycles', s.n, { txt: `${money(s.volume)} volume` })}
+    ${tile('Gains', money(s.gain), { txt: `top 5 made ${pct0(s.topGainShare)}` }, '', 'Total Gain')}
+    ${tile('Losses', money(s.loss), { txt: `top 5 made ${pct0(s.topLossShare)}` }, '', 'Total Loss')}
+  </div>`;
+  const lists = `<h2>Top earners</h2><div class="list">${gains.map(c => cycleCard(c)).join('') || card({ title: 'No winning cycles', sub: '' })}</div>
+    <h2>Top losers</h2><div class="list">${losses.map(c => cycleCard(c)).join('') || card({ title: 'No losing cycles', sub: '' })}</div>`;
+  return rail(DAY_CHIPS(), idx, 'day') + (LOAD_FAILED ? errBox : '')
+    + `<div class="layout two"><div>${hero}${tiles}</div><div>${lists}</div></div>`;
 }
 
 function viewWeek() {
   const days = RANGE_DAYS[state.rangeIdx];
-  const to = startOfDay(0) + DAY;
-  const list = inRange(to - days * DAY, to);
-  const s = stats(list, days);
-
-  // Per-day breakdown (last 7 days, oldest first), plus balance at each day's close.
-  let daily = '';
-  const cols = [];
-  for (let off = 7; off >= 1; off--) {
-    const f = startOfDay(off);
-    const dlist = inRange(f, f + DAY);
-    const p = dlist.reduce((a, c) => a + c.profit, 0);
-    const balCycle = DATA.cycles.find(c => c.ts < f + DAY); // cycles sorted desc → first before day end
-    cols.push({
-      label: off === 1 ? 'Yesterday' : `${off} days ago`,
-      profit: p,
-      balance: balCycle ? balCycle.balanceAfter : null
-    });
-  }
+  const to = startOfDay(0), from = to - days * DAY;
+  const s = stats(inRange(from, to), days);
+  const prev = stats(inRange(from - days * DAY, from), days);
+  const daily = dailyProfits(days);
   const current = DATA.cycles.length ? DATA.cycles[0].balanceAfter : DATA.capital;
-  daily = `<h2>Daily</h2><div class="tblwrap"><table class="data week">
-    <thead><tr><th></th>${cols.map(c => `<th>${c.label}</th>`).join('')}</tr></thead>
-    <tbody>
-      <tr><td>${infoLabel('Profit')}</td>${cols.map(c =>
-        `<td><span class="cell">${sq(c.profit >= 0 ? 'up' : 'down')}${fmtUsd(c.profit)} usd</span></td>`).join('')}</tr>
-      <tr><td>${infoLabel('Balance')}</td>${cols.map(c =>
-        `<td>${c.balance == null ? '—' : fmtUsd(c.balance) + ' usd'}</td>`).join('')}</tr>
-    </tbody></table></div>
-    <div class="kv">${kvRow('Current balance', `${fmtUsd(current)} usd`)}</div>`;
+  const best = daily.reduce((b, d) => d.v > b.v ? d : b, daily[0]);
 
-  return chipRow(RANGE_CHIPS, state.rangeIdx, 'range')
-    + (LOAD_FAILED ? errBox : '')
-    + `<h2>Summary</h2><div class="kv">`
-    + kvRow('Cycles', s.n)
-    + kvRow('Total Profit', `${fmtUsd(s.profit)} usd (${fmtPct(s.profitPct)})`)
-    + kvRow('Daily Average Profit', `${sq(s.dailyAvg >= 0 ? 'up' : 'down')}${fmtUsd(s.dailyAvg)} usd (${fmtPct(s.dailyAvgPct)})`)
-    + kvRow('Winrate', fmtPct(s.winrate))
-    + kvRow('Total Volume', `${fmtUsd(s.volume)} usd`)
-    + `</div>` + daily;
-}
-
-function exchanges() {
-  return [...new Set(DATA.cycles.map(c => c.exchange).filter(Boolean))];
-}
-
-function durSq(ms) {
-  return sq(ms < 50 ? 'up' : ms < 2000 ? 'warn' : 'down');
+  const hero = `<div class="eyebrow">${RANGE_CHIPS[state.rangeIdx]} · net profit · complete days ending yesterday</div>
+    <div class="hero"><div class="n">${money(s.profit)}</div><div class="pills">${deltaPill(s.profit, prev.profit, `vs the ${days} days before`)}<span class="pill">${pct2(s.profitPct)} of capital</span></div></div>`;
+  const tiles = `<div class="tiles">
+    ${tile('Daily average', money(s.dailyAvg), { txt: `${pct2(s.dailyAvgPct)} of capital` }, '', 'Daily Average Profit')}
+    ${tile('Win rate', pct0(s.winrate), { txt: `${s.n} cycles` })}
+    ${tile('Best day', money(best.v), { txt: dayLabel(best.off) })}
+    ${tile('Volume', money(s.volume), { txt: `${money(s.volume / days)} per day` })}
+  </div>`;
+  const chart = days <= 30 ? `<h2>Daily profit</h2>` + barChart(daily.map(d => ({ label: days <= 14 ? fmtDay(d.f + DAY / 2).replace(/ \w+$/, '') : fmtDayShort(d.f + DAY / 2), value: d.v })), s.dailyAvg) : '';
+  const rows = daily.slice().reverse();
+  const mob = `<div class="list mob">` + rows.map(d => card({ title: dayLabel(d.off), sub: `${d.n} cycles${d.bal != null ? ` · close ${money(d.bal)}` : ''}`, a: money(d.v, { plus: true }), b: 'profit', acls: d.v < 0 ? 'negv' : d.v < s.dailyAvg * 0.75 ? '' : 'pos' })).join('') + `</div>`;
+  const desk = `<div class="tblwrap desk"><table class="data"><thead><tr><th>Day</th><th class="r">Cycles</th><th class="r">${infoLabel('Profit')}</th><th class="r">${infoLabel('Balance')}</th></tr></thead><tbody>`
+    + rows.map(d => `<tr><td>${dayLabel(d.off)}</td><td class="r">${d.n}</td><td class="r ${d.v < 0 ? 'negv' : 'pos'}">${money(d.v, { plus: true })}</td><td class="r">${d.bal != null ? money(d.bal) : '—'}</td></tr>`).join('')
+    + `</tbody></table></div>`;
+  return rail(RANGE_CHIPS, state.rangeIdx, 'range') + (LOAD_FAILED ? errBox : '')
+    + `<div class="layout two"><div>${hero}${tiles}${chart}</div><div><h2>Day by day<span class="dim" style="font-size:.85rem;font-weight:500">balance now ${money(current)}</span></h2>${mob}${desk}</div></div>`;
 }
 
 function viewCycles() {
-  const from = startOfDay(state.dayIdx);
-  let list = inRange(from, from + DAY);
+  const idx = state.dayIdx;
+  const f = startOfDay(idx);
+  const all = inRange(f, f + DAY);
   const exs = exchanges();
-  if (exs.length && state.exch) list = list.filter(c => state.exch[c.exchange] !== false);
+  const list = exs.length ? all.filter(c => state.exch[c.exchange] !== false) : all;
+  const s = stats(list, 1);
+  const counts = {}; for (const c of all) counts[c.exchange] = (counts[c.exchange] || 0) + 1;
 
-  const filterRow = exs.length ? `<div class="filters">` + exs.map(x =>
-      `<label><input type="checkbox" data-exch="${esc(x)}"${state.exch && state.exch[x] === false ? '' : ' checked'}>${esc(x)}</label>`
-    ).join('') + `<a class="dl" href="#" id="dlcsv">Download</a></div>` : '';
-
-  const profit = list.reduce((a, c) => a + c.profit, 0);
-  const volume = list.reduce((a, c) => a + c.amount, 0);
-  const sumbox = `<div class="sumbox">${list.length} cycles<br>profit: ${fmtUsd(profit)} usd<br>volume: ${fmtUsd(volume)} usd</div>`;
-
-  const table = list.length ? `<div class="tblwrap"><table class="data">
-    <thead><tr>${['Id', 'Date', 'Cycle', 'Capacity', 'Amount (usd)', 'Profit Expected (%)', 'Profit Actual (%)', 'Profit Actual (usd)', 'Duration (ms)'].map(h => `<th>${infoLabel(h)}</th>`).join('')}</tr></thead>
-    <tbody>` + list.map(c => {
-      const actPct = c.profit / c.amount * 100;
-      return `<tr>
-      <td><a href="#/cycle/${c.id}">${c.id}</a></td>
-      <td>${new Date(c.ts).toISOString().replace('Z', '')}</td>
-      <td class="pair">${esc(c.cycle)}</td>
-      <td>${c.capacity != null ? fmtUsd(c.capacity) + ' usd' : '—'}</td>
-      <td>${fmtUsd(c.amount)} usd</td>
-      <td>${c.expectedPct != null ? sq('exp') + fmtPct(c.expectedPct) : '—'}</td>
-      <td>${sq(actPct > 0 ? 'up' : actPct < 0 ? 'down' : 'warn')}${fmtPct(actPct)}</td>
-      <td>${sq(c.profit > 0 ? 'up' : 'loss')}${fmtUsd(c.profit)} usd</td>
-      <td>${c.durationMs != null ? durSq(c.durationMs) + Math.round(c.durationMs) + ' ms' : '—'}</td>
-    </tr>`;
-    }).join('') + `</tbody></table></div>` : `<div class="kv">${kvRow('No cycles', '—')}</div>`;
-
-  return chipRow(DAY_CHIPS, state.dayIdx, 'day')
-    + (LOAD_FAILED ? errBox : '')
-    + filterRow + sumbox + table;
+  const tiles = `<div class="tiles" style="margin-top:0">
+    ${tile('Cycles', s.n, { txt: `${s.wins} won · ${s.n - s.wins} lost` })}
+    ${tile('Profit', money(s.profit), { txt: `${pct2(s.profitPct)} of capital`, cls: s.profit < 0 ? 'bad' : '' })}
+    ${tile('Volume', money(s.volume), null)}
+    ${tile('Concentration', s.gain > 0 ? pct0(s.topGainShare) : '—', { txt: 'of gains from top 5' })}
+  </div>`;
+  const filters = exs.length ? `<div class="rail" style="margin-top:6px">` + exs.map(x =>
+    `<button class="chip${state.exch[x] === false ? '' : ' on'}" data-exch="${esc(x)}">${esc(x)} ${counts[x] || 0}</button>`).join('') + `</div>` : '';
+  const dl = `<div class="filters"><span class="dim" style="font-size:.9rem">${list.length} cycles · ${dayLabel(idx)}</span><a class="dl" href="#" id="dlcsv">Download CSV</a></div>`;
+  return rail(DAY_CHIPS(), idx, 'day') + (LOAD_FAILED ? errBox : '') + tiles + filters + dl + cycleRows(list);
 }
 
 function downloadCsv() {
@@ -486,7 +627,7 @@ function downloadCsv() {
   const blob = new Blob([head + '\n' + rows.join('\n')], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `synchronous-cycles-${new Date(from).toISOString().slice(0, 10)}.csv`;
+  a.download = `cycles-${new Date(from).toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -495,83 +636,65 @@ function viewCycleDetail(id) {
   const c = DATA.cycles.find(x => x.id === +id);
   if (!c) return `<a class="back" href="#/cycles">&larr; Cycles</a>` + errBox;
   const balBefore = c.balanceAfter != null ? c.balanceAfter - c.profit : null;
+  const actPct = c.profit / c.amount * 100;
+  const head = `<a class="back" href="#/cycles">&larr; Cycles</a>
+    <div class="eyebrow">Cycle ${c.id} · ${fmtDay(c.ts)} ${fmtTime(c.ts)}${c.exchange ? ` · ${esc(c.exchange)}` : ''}</div>
+    <div class="hero"><div class="n" style="font-size:34px">${cyclePath(c.cycle)}</div>
+    <div class="pills"><span class="pill ${c.profit >= 0 ? 'green' : 'red'}">${money(c.profit, { plus: true })} · ${pct2(actPct)}</span>${c.expectedPct != null ? `<span class="pill">expected ${pct2(c.expectedPct)}</span>` : ''}${c.durationMs != null ? `<span class="pill">${dur(c.durationMs)}</span>` : ''}</div></div>`;
+  const trade = `<h2>Trade</h2><div class="kv">`
+    + kvRow('Amount', money(c.amount))
+    + (c.capacity != null ? kvRow('Capacity', money(c.capacity)) : '')
+    + (c.capacity ? kvRow('Capacity used', pct0(c.amount / c.capacity * 100)) : '')
+    + `</div><h2>Result</h2><div class="kv">`
+    + (c.expectedPct != null ? kvRow('Profit Expected, %', pct2(c.expectedPct)) : '')
+    + kvRow('Profit Actual, %', pct2(actPct))
+    + kvRow('Profit Actual, usd', `<span class="${c.profit >= 0 ? 'pos' : 'negv'}">${money(c.profit, { plus: true })}</span>`)
+    + (c.durationMs != null ? kvRow('Duration', dur(c.durationMs)) : '')
+    + `</div><h2>Balance</h2><div class="kv">`
+    + (balBefore != null ? kvRow('Balance Before', money(balBefore)) : '')
+    + (c.balanceAfter != null ? kvRow('Balance After', money(c.balanceAfter)) : '')
+    + `</div>`;
   let legs = '';
   if (c.legs && c.legs.length) {
-    legs = `<h2>Legs</h2><div class="tblwrap"><table class="data">
-      <thead><tr>${['Pair', 'Price Wanted', 'Price Executed', 'Duration', 'Slippage'].map(h => `<th>${infoLabel(h)}</th>`).join('')}</tr></thead>
-      <tbody>` + c.legs.map(l => `<tr>
-        <td class="pair">${esc(l.pair)}</td>
-        <td>${l.wanted}</td>
-        <td>${l.executed}</td>
-        <td>${l.durationMs}ms</td>
-        <td>${fmtPct(l.slippagePct)}</td>
-      </tr>`).join('') + `</tbody></table></div>`;
+    legs = `<h2>Legs</h2><div class="list mob">` + c.legs.map(l => card({ title: esc(l.pair), sub: `wanted ${l.wanted} · executed ${l.executed} · ${dur(l.durationMs)}`, a: pct2(l.slippagePct), b: 'slippage', acls: l.slippagePct > 0.5 ? 'negv' : '' })).join('') + `</div>`
+      + `<div class="tblwrap desk"><table class="data"><thead><tr>${['Pair', 'Price Wanted', 'Price Executed', 'Duration', 'Slippage'].map((h, i) => `<th class="${i ? 'r' : ''}">${infoLabel(h)}</th>`).join('')}</tr></thead><tbody>`
+      + c.legs.map(l => `<tr><td>${esc(l.pair)}</td><td class="r">${l.wanted}</td><td class="r">${l.executed}</td><td class="r">${dur(l.durationMs)}</td><td class="r ${l.slippagePct > 0.5 ? 'negv' : ''}">${pct2(l.slippagePct)}</td></tr>`).join('')
+      + `</tbody></table></div>`;
   }
-  return `<a class="back" href="#/cycles">&larr; Cycles</a>`
-    + `<h2>Cycle ${c.id}</h2><div class="kv">`
-    + kvRow('Id', c.id)
-    + kvRow('Cycle', esc(c.cycle))
-    + kvRow('Time', new Date(c.ts).toISOString())
-    + (c.exchange ? kvRow('Exchange', esc(c.exchange)) : '')
-    + (c.capacity != null ? kvRow('Capacity', `${fmtUsd(c.capacity)} usd`) : '')
-    + kvRow('Amount', `${fmtUsd(c.amount)} usd`)
-    + (c.capacity ? kvRow('Amount Used, %', fmtPct(c.amount / c.capacity * 100)) : '')
-    + (balBefore != null ? kvRow('Balance Before', `${fmtUsd(balBefore)} usd`) : '')
-    + (c.balanceAfter != null ? kvRow('Balance After', `${fmtUsd(c.balanceAfter)} usd`) : '')
-    + (c.expectedPct != null ? kvRow('Profit Expected, %', fmtPct(c.expectedPct)) : '')
-    + kvRow('Profit Actual, %', fmtPct(c.profit / c.amount * 100))
-    + kvRow('Profit Actual, usd', `${sq(c.profit >= 0 ? 'up' : 'loss')}${fmtUsd(c.profit)} usd`)
-    + (c.durationMs != null ? kvRow('Duration', `${c.durationMs}ms`) : '')
-    + `</div>` + legs;
-}
-
-function viewStatus() {
-  const today = inRange(startOfDay(0), startOfDay(0) + DAY);
-  const s = stats(today, 1);
-  const last = DATA.cycles[0];
-  const current = last ? last.balanceAfter : DATA.capital;
-  return (LOAD_FAILED ? errBox : '')
-    + `<h2>Status</h2><div class="kv">`
-    + kvRow('Engine', `<span class="status-dot"></span>Running`)
-    + kvRow('Last Cycle', last ? new Date(last.ts).toLocaleString() : '—')
-    + kvRow('Cycles Today', s.n)
-    + kvRow('Profit Today', `${sq(s.profit >= 0 ? 'up' : 'down')}${fmtUsd(s.profit)} usd (${fmtPct(s.profitPct)})`)
-    + (current != null ? kvRow('Current Balance', `${fmtUsd(current)} usd`) : '')
-    + kvRow('Capital', `${fmtUsd(DATA.capital)} usd`)
-    + `</div>`;
+  return head + `<div class="layout two"><div>${trade}</div><div>${legs}</div></div>`;
 }
 
 /* ---------- router / events ---------- */
 
+const NAV = [['#/status', 'Today'], ['#/day', 'Day'], ['#/week', 'Week'], ['#/cycles', 'Cycles']];
+
 function render() {
   if (!DATA) return;
-  const hash = location.hash || '#/day';
-  let html;
+  const hash = location.hash || '#/status';
+  let html, current = hash;
   const detail = hash.match(/^#\/cycle\/(\d+)$/);
-  if (detail) html = viewCycleDetail(detail[1]);
-  else if (hash === '#/status') html = viewStatus();
+  if (detail) { html = viewCycleDetail(detail[1]); current = '#/cycles'; }
+  else if (hash === '#/day') html = viewDay();
   else if (hash === '#/week') html = viewWeek();
   else if (hash === '#/cycles') html = viewCycles();
-  else html = viewDay();
+  else { html = viewStatus(); current = '#/status'; }
   document.getElementById('view').innerHTML = html;
-  document.querySelectorAll('.menu a').forEach(a =>
-    a.classList.toggle('current', a.getAttribute('href') === hash));
+  document.querySelectorAll('nav.nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === current));
+  const clock = document.getElementById('clock');
+  if (clock) clock.textContent = `${fmtDay(Date.now())} · ${fmtTime(Date.now())}`;
+  window.scrollTo(0, 0);
+  document.querySelectorAll('nav.nav a.current, .chip.sel').forEach(el => { try { el.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch (e) {} });
   window.scrollTo(0, 0);
 }
 
-document.getElementById('burger').addEventListener('click', e => {
-  const m = document.getElementById('menu');
-  m.hidden = !m.hidden;
-  e.currentTarget.setAttribute('aria-expanded', String(!m.hidden));
-});
-
-document.getElementById('menu').addEventListener('click', () => {
-  document.getElementById('menu').hidden = true;
-  document.getElementById('burger').setAttribute('aria-expanded', 'false');
-});
+document.getElementById('nav').innerHTML = NAV.map(([h, l]) => `<a href="${h}">${l}</a>`).join('');
 
 document.getElementById('view').addEventListener('click', e => {
   if (e.target.closest('#dlcsv')) { e.preventDefault(); downloadCsv(); return; }
+  const dd = e.target.closest('a[data-day]');
+  if (dd) { state.dayIdx = +dd.dataset.day; return; }
+  const ex = e.target.closest('button[data-exch]');
+  if (ex) { state.exch[ex.dataset.exch] = state.exch[ex.dataset.exch] === false; render(); return; }
   const b = e.target.closest('.chip');
   if (!b) return;
   if (b.dataset.act === 'day') state.dayIdx = +b.dataset.i;
@@ -579,14 +702,8 @@ document.getElementById('view').addEventListener('click', e => {
   render();
 });
 
-document.getElementById('view').addEventListener('change', e => {
-  const cb = e.target.closest('input[data-exch]');
-  if (!cb) return;
-  state.exch[cb.dataset.exch] = cb.checked;
-  render();
-});
-
 window.addEventListener('hashchange', render);
+let resizeT; window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(render, 150); });
 
 /* Metric definition overlay */
 function showDef(label) {
@@ -604,6 +721,7 @@ document.body.addEventListener('click', e => {
 }, true);
 
 loadData().then(render);
+
 </script>
 </body>
 </html>
