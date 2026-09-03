@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
+<meta name="description" content="Arbitrage cycle dashboard. Status, daily and weekly metrics, and cycle-level P&L.">
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --bg:        #ffffff;
+    --card:      #f7f8fa;
+    --ink:       #3d4b5c;
+    --ink-strong:#33404f;
+    --ink-dim:   #8a94a3;
+    --line:      #e4e7ec;
+    --red:       #c22a29;
+    --red-soft:  #fdeeea;
+    --red-text:  #e05c3f;
+    --green:     #7cc142;
+    --orange:    #e8912d;
+    --neg:       #d8382e;
+    --link:      #2f6fd0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 18px 20px 60px; }
+
+  /* Header */
+  header { display: flex; align-items: center; justify-content: flex-end; padding: 6px 0 14px; }
+  .burger {
+    background: none; border: 0; cursor: pointer; padding: 8px 2px;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .burger span { display: block; width: 26px; height: 2.5px; background: var(--ink-strong); border-radius: 2px; }
+
+  /* Menu card */
+  .menu { background: var(--card); border-radius: 12px; padding: 14px 0; margin-bottom: 20px; }
+  .menu[hidden] { display: none; }
+  .menu a { display: block; padding: 12px 34px; color: var(--ink); text-decoration: none; font-size: 1.15rem; }
+  .menu a:active, .menu a.current { color: var(--ink-strong); font-weight: 500; }
+
+  /* Chips */
+  .chips { display: flex; flex-wrap: wrap; row-gap: 8px; column-gap: 4px; margin: 4px 0 22px; }
+  .chip {
+    background: none; border: 0; cursor: pointer; font: inherit; color: var(--ink-strong);
+    padding: 10px 18px; border-radius: 10px; white-space: nowrap;
+  }
+  .chip.sel { background: var(--red); color: #fff; }
+
+  h2 { font-size: 1.35rem; font-weight: 600; color: var(--ink-dim); margin: 26px 0 4px; }
+
+  /* Key/value summary table */
+  .kv { width: 100%; }
+  .kv .row {
+    display: flex; align-items: baseline; gap: 16px;
+    padding: 20px 2px; border-bottom: 1px solid var(--line);
+  }
+  .kv .k { color: var(--ink-strong); flex: 0 0 42%; }
+  .kv .v { color: var(--ink-strong); flex: 1; }
+  .sq {
+    display: inline-block; width: 14px; height: 14px; border-radius: 2.5px;
+    vertical-align: -1px; margin-right: 8px; flex: none;
+  }
+  .sq.up   { background: var(--green); }
+  .sq.down { background: var(--neg); }
+  .sq.loss { background: var(--orange); }
+
+  /* Data tables */
+  .tblwrap { overflow-x: auto; margin: 8px 0 26px; }
+  table.data { width: 100%; border-collapse: collapse; }
+  table.data th {
+    background: var(--card); color: var(--ink-dim); font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; text-align: left; padding: 14px 12px;
+    white-space: nowrap;
+  }
+  table.data td { padding: 18px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; color: var(--ink-strong); }
+  table.data a { color: var(--link); text-decoration: none; }
+  table.data td.pair { letter-spacing: 0.02em; }
+
+  /* Week horizontal table */
+  table.week th { text-align: left; }
+  table.week td .cell { display: flex; align-items: center; gap: 0; }
+
+  /* Trading-log extras */
+  .filters { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin: 4px 0 14px; }
+  .filters label { display: inline-flex; align-items: center; gap: 7px; font-size: 0.95rem; color: var(--ink-strong); }
+  .filters input { width: 17px; height: 17px; accent-color: var(--link); }
+  .dl { color: var(--link); text-decoration: none; font-size: 0.95rem; margin-left: auto; }
+  .sumbox {
+    background: var(--card); border-radius: 8px; padding: 12px 16px; margin: 0 0 16px;
+    font-size: 0.9rem; color: var(--ink-strong); line-height: 1.55; display: inline-block;
+  }
+  .sq.warn { background: #e8c22d; }
+  .sq.exp  { background: #35b96b; }
+
+  /* Metric definition overlay */
+  button.i {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; padding: 0; margin-left: 7px; vertical-align: 1px;
+    border: 1px solid var(--ink-dim); border-radius: 50%; background: none;
+    color: var(--ink-dim); font: italic 600 11px Georgia, serif; cursor: pointer;
+  }
+  .scrim {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .defcard {
+    background: #fff; border-radius: 14px; padding: 22px 24px; max-width: 420px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+  .defcard h3 { font-size: 1.05rem; color: var(--ink-strong); margin-bottom: 8px; }
+  .defcard p { font-size: 0.95rem; color: var(--ink); line-height: 1.55; }
+
+  /* Error state */
+  .err {
+    background: var(--red-soft); color: var(--red-text); border-radius: 10px;
+    padding: 18px 20px; margin: 10px 0 24px;
+  }
+  .hint { color: var(--ink-dim); font-size: 0.85rem; margin-top: 30px; }
+  .hint code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; }
+  .back { display: inline-block; margin: 4px 0 10px; color: var(--link); text-decoration: none; }
+
+  .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-right: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav class="menu" id="menu" hidden>
+    <a href="#/status">Status</a>
+    <a href="#/day">Metrics/Day</a>
+    <a href="#/week">Metrics/Week</a>
+    <a href="#/cycles">Cycles</a>
+  </nav>
+
+  <main id="view"></main>
+
+<!-- To display live bot output, place a data.json next to this page:
+  {"capital": 30000, "cycles": [{"id": 167239, "ts": "2026-09-03T09:31:00Z", "cycle": "USDT-ARB-USDC-USDT",
+   "amount": 500, "profit": 19.87, "expectedPct": 1.89, "durationMs": 734, "balanceAfter": 37049.62,
+   "legs": [{"pair": "ARBUSDT [BUY]", "wanted": 20.82, "executed": 20.8113, "durationMs": 734.5, "slippagePct": -0.04}]}, …]}
+  Optional fields: exchange, capacity. Without data.json the page renders built-in demo data. -->
+</div>
+
+<script>
+'use strict';
+
+/* ---------- data ---------- */
+
+const DAY = 86400000;
+let DATA = null; // {capital, cycles:[{id, ts, cycle, amount, profit, expectedPct, durationMs, balanceAfter, legs[]}]}
+let LOAD_FAILED = false;
+
+// Deterministic PRNG so the demo numbers are stable between visits.
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function demoData() {
+  const rnd = mulberry32(20260903);
+  const legsPool = ['ARB', 'INJ', 'MANTA', 'TIA', 'PEPE', 'AUCTION', 'TKO', 'LAZIO', 'BLUR', 'SOL', 'DOGE', 'OP', 'SUI', 'WLD', 'JUP', 'ENS', 'MEME', 'BONK', 'DEGO', 'UNFI'];
+  const mids = ['USDC', 'FDUSD', 'BTC', 'TRY', 'ETH', 'EUR'];
+  const cycles = [];
+  const now = Date.now();
+  let id = 150000;
+  for (let d = 179; d >= 0; d--) {
+    const dayStart = now - d * DAY;
+    const n = 35 + Math.floor(rnd() * 40);
+    // Bias drifts so different ranges show different-looking totals (incl. losing stretches).
+    const bias = Math.sin(d / 11) * 0.35 + (d > 60 && d < 120 ? -0.25 : 0.12);
+    for (let i = 0; i < n; i++) {
+      const win = rnd() < 0.574 + bias * 0.08;
+      const mag = Math.pow(rnd(), 1.6);
+      const profit = win ? +(mag * 22 + 0.4).toFixed(2) : -+(mag * 18 + 0.3).toFixed(2);
+      const a = legsPool[Math.floor(rnd() * legsPool.length)];
+      const b = mids[Math.floor(rnd() * mids.length)];
+      const three = rnd() < 0.5;
+      const cycle = three ? `USDT-${a}-${b}` : `USDT-${b}-${a}-USDT`;
+      const amount = rnd() < 0.93 ? 500 : +(300 + rnd() * 250).toFixed(2);
+      const pairs = three
+        ? [`${a}USDT [BUY]`, `${a}${b} [SELL]`]
+        : [`${b}USDT [BUY]`, `${a}${b} [BUY]`, `${a}USDT [SELL]`];
+      const legRows = pairs.map(p => {
+        const wanted = +(rnd() * 40 + 0.5).toFixed(2);
+        const slip = +((rnd() - 0.45) * (win ? 0.6 : 6)).toFixed(2);
+        return {
+          pair: p,
+          wanted,
+          executed: +(wanted * (1 - slip / 100)).toFixed(6),
+          durationMs: +(rnd() * 4000 + 30).toFixed(3),
+          slippagePct: slip
+        };
+      });
+      const exch = rnd() < 0.8 ? 'Binance' : ['Kraken', 'Gate', 'Okex'][Math.floor(rnd() * 3)];
+      cycles.push({
+        id: id++,
+        ts: dayStart - Math.floor(rnd() * DAY),
+        cycle, amount, profit,
+        exchange: exch,
+        capacity: +(amount * (1 + rnd() * 2.5)).toFixed(2),
+        expectedPct: +(rnd() * 2.4 + 0.2).toFixed(2),
+        durationMs: +legRows.reduce((s, l) => s + l.durationMs, 0).toFixed(3),
+        legs: legRows
+      });
+    }
+  }
+  cycles.sort((x, y) => x.ts - y.ts);
+  let bal = 30000;
+  for (const c of cycles) { bal += c.profit; c.balanceAfter = +bal.toFixed(2); }
+  cycles.reverse();
+  return { capital: 30000, cycles };
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('data.json', { cache: 'no-store' });
+    if (res.ok) {
+      const j = await res.json();
+      j.cycles.forEach(c => { c.ts = typeof c.ts === 'number' ? c.ts : Date.parse(c.ts); });
+      j.cycles.sort((x, y) => y.ts - x.ts);
+      DATA = j;
+      return;
+    }
+    if (res.status !== 404) { LOAD_FAILED = true; }
+  } catch (e) {
+    // A thrown fetch is a real network failure on http(s); under file:// preview it's expected.
+    if (location.protocol.startsWith('http')) LOAD_FAILED = true;
+  }
+  DATA = demoData();
+}
+
+/* ---------- helpers ---------- */
+
+const fmtUsd = n => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtPct = n => n.toFixed(2) + '%';
+
+function inRange(fromMs, toMs) {
+  return DATA.cycles.filter(c => c.ts >= fromMs && c.ts < toMs);
+}
+
+function stats(list, days) {
+  const s = { n: list.length, profit: 0, volume: 0, gain: 0, loss: 0, wins: 0 };
+  const gains = [], losses = [];
+  for (const c of list) {
+    s.profit += c.profit;
+    s.volume += c.amount;
+    if (c.profit >= 0) { s.wins++; s.gain += c.profit; gains.push(c.profit); }
+    else { s.loss += c.profit; losses.push(c.profit); }
+  }
+  gains.sort((a, b) => b - a); losses.sort((a, b) => a - b);
+  s.topGainShare = s.gain > 0 ? gains.slice(0, 5).reduce((a, b) => a + b, 0) / s.gain * 100 : 0;
+  s.topLossShare = s.loss < 0 ? losses.slice(0, 5).reduce((a, b) => a + b, 0) / s.loss * 100 : 0;
+  s.winrate = s.n ? s.wins / s.n * 100 : 0;
+  s.profitPct = DATA.capital ? s.profit / DATA.capital * 100 : 0;
+  s.dailyAvg = s.profit / days;
+  s.dailyAvgPct = DATA.capital ? s.dailyAvg / DATA.capital * 100 : 0;
+  return s;
+}
+
+function esc(t) {
+  return String(t).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+/* Metric definitions shown by the ⓘ icon next to each title. */
+const DEFS = {
+  'Engine': 'Whether the trading engine is running.',
+  'Last Cycle': 'Completion time of the most recent arbitrage cycle.',
+  'Cycles Today': 'Number of arbitrage cycles completed today.',
+  'Profit Today': 'Net profit generated today in USD. In brackets: as a percentage of capital.',
+  'Current Balance': 'Account balance after the most recent cycle.',
+  'Current balance': 'Account balance after the most recent cycle.',
+  'Capital': 'The capital base used for percentage calculations.',
+  'Total Profit': 'Net profit over the selected period in USD. In brackets: as a percentage of capital.',
+  'Winrate': 'Percentage of cycles that closed with a positive result.',
+  'Cycles': 'Number of arbitrage cycles completed in the selected period.',
+  'Total Gain': 'Sum of all positive cycle results. In brackets: the share contributed by the 5 biggest winners.',
+  'Total Loss': 'Sum of all negative cycle results. In brackets: the share contributed by the 5 biggest losers.',
+  'Total Volume': 'Total traded volume in USD over the period.',
+  'Daily Average Profit': 'Total profit divided by the number of days in the period. In brackets: as a percentage of capital.',
+  'Profit': 'Net profit for that day.',
+  'Balance': 'Account balance at the end of that day.',
+  'Top Earners': 'The most profitable cycles of the day. Click an id for full details.',
+  'Top Losers': 'The most losing cycles of the day. Click an id for full details.',
+  'Id': 'Unique cycle identifier. Click for full details.',
+  'Date': 'Cycle completion time.',
+  'Cycle': 'The pair path traded by this arbitrage cycle.',
+  'Capacity': 'Maximum amount the order books could absorb for this cycle.',
+  'Amount': 'Amount actually committed to the cycle in USD.',
+  'Amount (usd)': 'Amount actually committed to the cycle in USD.',
+  'Profit Expected (%)': 'Profit predicted before execution, as a percentage of the amount.',
+  'Profit Actual (%)': 'Realized profit as a percentage of the amount.',
+  'Profit Actual (usd)': 'Realized profit in USD.',
+  'Profit Expected, %': 'Profit predicted before execution, as a percentage of the amount.',
+  'Profit Actual, %': 'Realized profit as a percentage of the amount.',
+  'Profit Actual, usd': 'Realized profit in USD.',
+  'Duration (ms)': 'Total execution time of the cycle in milliseconds.',
+  'Duration': 'Execution time.',
+  'Time': 'Cycle completion time.',
+  'Exchange': 'Exchange where the cycle executed.',
+  'Amount Used, %': 'Committed amount as a percentage of available capacity.',
+  'Balance Before': 'Account balance before the cycle.',
+  'Balance After': 'Account balance after the cycle.',
+  'Pair': 'The traded pair and side for this leg of the cycle.',
+  'Price Wanted': 'Price targeted when the leg was submitted.',
+  'Price Executed': 'Price actually filled.',
+  'Slippage': 'Difference between wanted and executed price, in percent.'
+};
+
+const infoLabel = k => DEFS[k]
+  ? `${k}<button class="i" data-def="${esc(k)}" aria-label="What is ${esc(k)}?">i</button>` : k;
+
+function kvRow(k, vHtml) {
+  return `<div class="row"><span class="k">${infoLabel(k)}</span><span class="v">${vHtml}</span></div>`;
+}
+
+function sq(cls) { return `<span class="sq ${cls}"></span>`; }
+
+function chipRow(items, selIdx, onName) {
+  return `<div class="chips">` + items.map((t, i) =>
+    `<button class="chip${i === selIdx ? ' sel' : ''}" data-act="${onName}" data-i="${i}">${t}</button>`
+  ).join('') + `</div>`;
+}
+
+function cyclesTable(list, { firstCol } = {}) {
+  if (!list.length) return `<div class="kv">${kvRow('No cycles', '—')}</div>`;
+  return `<div class="tblwrap"><table class="data">
+    <thead><tr>${firstCol ? `<th>${infoLabel(firstCol)}</th>` : ''}<th>${infoLabel('Cycle')}</th><th>${infoLabel('Amount')}</th><th>${infoLabel('Profit')}</th></tr></thead>
+    <tbody>` + list.map(c => `<tr>
+      ${firstCol ? `<td><a href="#/cycle/${c.id}">${c.id}</a></td>` : ''}
+      <td class="pair">${esc(c.cycle)}</td>
+      <td>${fmtUsd(c.amount)} usd</td>
+      <td>${sq(c.profit >= 0 ? 'up' : 'loss')}${fmtUsd(c.profit)} usd</td>
+    </tr>`).join('') + `</tbody></table></div>`;
+}
+
+const errBox = `<div class="err">Load failed</div>`;
+
+/* ---------- views ---------- */
+
+const DAY_CHIPS = ['Today', 'Yesterday', '2 days ago', '3 days ago', '4 days ago', '5 days ago', '6 days ago'];
+const RANGE_CHIPS = ['Last 1 Day', 'Last 3 Days', 'Last 7 Days', 'Last 14 Days', 'Last 30 Days', 'Last 60 Days', 'Last 90 Days', 'Last 180 Days'];
+const RANGE_DAYS = [1, 3, 7, 14, 30, 60, 90, 180];
+
+const state = { dayIdx: 0, rangeIdx: 4, exch: {} };
+
+function startOfDay(offset) {
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  return d.getTime() - offset * DAY;
+}
+
+function viewDay() {
+  const from = startOfDay(state.dayIdx);
+  const list = inRange(from, from + DAY);
+  const s = stats(list, 1);
+  const gains = list.filter(c => c.profit >= 0).sort((a, b) => b.profit - a.profit).slice(0, 5);
+  const losses = list.filter(c => c.profit < 0).sort((a, b) => a.profit - b.profit).slice(0, 5);
+  return chipRow(DAY_CHIPS, state.dayIdx, 'day')
+    + (LOAD_FAILED ? errBox : '')
+    + `<h2>Summary</h2><div class="kv">`
+    + kvRow('Total Profit', `${fmtUsd(s.profit)} usd (${fmtPct(s.profitPct)})`)
+    + kvRow('Winrate', fmtPct(s.winrate))
+    + kvRow('Cycles', s.n)
+    + kvRow('Total Gain', `${fmtUsd(s.gain)} usd (top 5 is ${fmtPct(s.topGainShare)})`)
+    + kvRow('Total Loss', `${fmtUsd(s.loss)} usd (top 5 is ${fmtPct(s.topLossShare)})`)
+    + kvRow('Total Volume', `${fmtUsd(s.volume)} usd`)
+    + `</div>`
+    + `<h2>Top Earners</h2>` + cyclesTable(gains, { firstCol: 'Top Earners' })
+    + `<h2>Top Losers</h2>` + cyclesTable(losses, { firstCol: 'Top Losers' });
+}
+
+function viewWeek() {
+  const days = RANGE_DAYS[state.rangeIdx];
+  const to = startOfDay(0) + DAY;
+  const list = inRange(to - days * DAY, to);
+  const s = stats(list, days);
+
+  // Per-day breakdown (last 7 days, oldest first), plus balance at each day's close.
+  let daily = '';
+  const cols = [];
+  for (let off = 7; off >= 1; off--) {
+    const f = startOfDay(off);
+    const dlist = inRange(f, f + DAY);
+    const p = dlist.reduce((a, c) => a + c.profit, 0);
+    const balCycle = DATA.cycles.find(c => c.ts < f + DAY); // cycles sorted desc → first before day end
+    cols.push({
+      label: off === 1 ? 'Yesterday' : `${off} days ago`,
+      profit: p,
+      balance: balCycle ? balCycle.balanceAfter : null
+    });
+  }
+  const current = DATA.cycles.length ? DATA.cycles[0].balanceAfter : DATA.capital;
+  daily = `<h2>Daily</h2><div class="tblwrap"><table class="data week">
+    <thead><tr><th></th>${cols.map(c => `<th>${c.label}</th>`).join('')}</tr></thead>
+    <tbody>
+      <tr><td>${infoLabel('Profit')}</td>${cols.map(c =>
+        `<td><span class="cell">${sq(c.profit >= 0 ? 'up' : 'down')}${fmtUsd(c.profit)} usd</span></td>`).join('')}</tr>
+      <tr><td>${infoLabel('Balance')}</td>${cols.map(c =>
+        `<td>${c.balance == null ? '—' : fmtUsd(c.balance) + ' usd'}</td>`).join('')}</tr>
+    </tbody></table></div>
+    <div class="kv">${kvRow('Current balance', `${fmtUsd(current)} usd`)}</div>`;
+
+  return chipRow(RANGE_CHIPS, state.rangeIdx, 'range')
+    + (LOAD_FAILED ? errBox : '')
+    + `<h2>Summary</h2><div class="kv">`
+    + kvRow('Cycles', s.n)
+    + kvRow('Total Profit', `${fmtUsd(s.profit)} usd (${fmtPct(s.profitPct)})`)
+    + kvRow('Daily Average Profit', `${sq(s.dailyAvg >= 0 ? 'up' : 'down')}${fmtUsd(s.dailyAvg)} usd (${fmtPct(s.dailyAvgPct)})`)
+    + kvRow('Winrate', fmtPct(s.winrate))
+    + kvRow('Total Volume', `${fmtUsd(s.volume)} usd`)
+    + `</div>` + daily;
+}
+
+function exchanges() {
+  return [...new Set(DATA.cycles.map(c => c.exchange).filter(Boolean))];
+}
+
+function durSq(ms) {
+  return sq(ms < 50 ? 'up' : ms < 2000 ? 'warn' : 'down');
+}
+
+function viewCycles() {
+  const from = startOfDay(state.dayIdx);
+  let list = inRange(from, from + DAY);
+  const exs = exchanges();
+  if (exs.length && state.exch) list = list.filter(c => state.exch[c.exchange] !== false);
+
+  const filterRow = exs.length ? `<div class="filters">` + exs.map(x =>
+      `<label><input type="checkbox" data-exch="${esc(x)}"${state.exch && state.exch[x] === false ? '' : ' checked'}>${esc(x)}</label>`
+    ).join('') + `<a class="dl" href="#" id="dlcsv">Download</a></div>` : '';
+
+  const profit = list.reduce((a, c) => a + c.profit, 0);
+  const volume = list.reduce((a, c) => a + c.amount, 0);
+  const sumbox = `<div class="sumbox">${list.length} cycles<br>profit: ${fmtUsd(profit)} usd<br>volume: ${fmtUsd(volume)} usd</div>`;
+
+  const table = list.length ? `<div class="tblwrap"><table class="data">
+    <thead><tr>${['Id', 'Date', 'Cycle', 'Capacity', 'Amount (usd)', 'Profit Expected (%)', 'Profit Actual (%)', 'Profit Actual (usd)', 'Duration (ms)'].map(h => `<th>${infoLabel(h)}</th>`).join('')}</tr></thead>
+    <tbody>` + list.map(c => {
+      const actPct = c.profit / c.amount * 100;
+      return `<tr>
+      <td><a href="#/cycle/${c.id}">${c.id}</a></td>
+      <td>${new Date(c.ts).toISOString().replace('Z', '')}</td>
+      <td class="pair">${esc(c.cycle)}</td>
+      <td>${c.capacity != null ? fmtUsd(c.capacity) + ' usd' : '—'}</td>
+      <td>${fmtUsd(c.amount)} usd</td>
+      <td>${c.expectedPct != null ? sq('exp') + fmtPct(c.expectedPct) : '—'}</td>
+      <td>${sq(actPct > 0 ? 'up' : actPct < 0 ? 'down' : 'warn')}${fmtPct(actPct)}</td>
+      <td>${sq(c.profit > 0 ? 'up' : 'loss')}${fmtUsd(c.profit)} usd</td>
+      <td>${c.durationMs != null ? durSq(c.durationMs) + Math.round(c.durationMs) + ' ms' : '—'}</td>
+    </tr>`;
+    }).join('') + `</tbody></table></div>` : `<div class="kv">${kvRow('No cycles', '—')}</div>`;
+
+  return chipRow(DAY_CHIPS, state.dayIdx, 'day')
+    + (LOAD_FAILED ? errBox : '')
+    + filterRow + sumbox + table;
+}
+
+function downloadCsv() {
+  const from = startOfDay(state.dayIdx);
+  let list = inRange(from, from + DAY);
+  if (state.exch) list = list.filter(c => state.exch[c.exchange] !== false);
+  const head = 'id,date,exchange,cycle,capacity,amount_usd,profit_expected_pct,profit_actual_pct,profit_actual_usd,duration_ms';
+  const rows = list.map(c => [
+    c.id, new Date(c.ts).toISOString(), c.exchange || '', c.cycle,
+    c.capacity != null ? c.capacity : '', c.amount,
+    c.expectedPct != null ? c.expectedPct : '', (c.profit / c.amount * 100).toFixed(4),
+    c.profit, c.durationMs != null ? c.durationMs : ''
+  ].join(','));
+  const blob = new Blob([head + '\n' + rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `synchronous-cycles-${new Date(from).toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function viewCycleDetail(id) {
+  const c = DATA.cycles.find(x => x.id === +id);
+  if (!c) return `<a class="back" href="#/cycles">&larr; Cycles</a>` + errBox;
+  const balBefore = c.balanceAfter != null ? c.balanceAfter - c.profit : null;
+  let legs = '';
+  if (c.legs && c.legs.length) {
+    legs = `<h2>Legs</h2><div class="tblwrap"><table class="data">
+      <thead><tr>${['Pair', 'Price Wanted', 'Price Executed', 'Duration', 'Slippage'].map(h => `<th>${infoLabel(h)}</th>`).join('')}</tr></thead>
+      <tbody>` + c.legs.map(l => `<tr>
+        <td class="pair">${esc(l.pair)}</td>
+        <td>${l.wanted}</td>
+        <td>${l.executed}</td>
+        <td>${l.durationMs}ms</td>
+        <td>${fmtPct(l.slippagePct)}</td>
+      </tr>`).join('') + `</tbody></table></div>`;
+  }
+  return `<a class="back" href="#/cycles">&larr; Cycles</a>`
+    + `<h2>Cycle ${c.id}</h2><div class="kv">`
+    + kvRow('Id', c.id)
+    + kvRow('Cycle', esc(c.cycle))
+    + kvRow('Time', new Date(c.ts).toISOString())
+    + (c.exchange ? kvRow('Exchange', esc(c.exchange)) : '')
+    + (c.capacity != null ? kvRow('Capacity', `${fmtUsd(c.capacity)} usd`) : '')
+    + kvRow('Amount', `${fmtUsd(c.amount)} usd`)
+    + (c.capacity ? kvRow('Amount Used, %', fmtPct(c.amount / c.capacity * 100)) : '')
+    + (balBefore != null ? kvRow('Balance Before', `${fmtUsd(balBefore)} usd`) : '')
+    + (c.balanceAfter != null ? kvRow('Balance After', `${fmtUsd(c.balanceAfter)} usd`) : '')
+    + (c.expectedPct != null ? kvRow('Profit Expected, %', fmtPct(c.expectedPct)) : '')
+    + kvRow('Profit Actual, %', fmtPct(c.profit / c.amount * 100))
+    + kvRow('Profit Actual, usd', `${sq(c.profit >= 0 ? 'up' : 'loss')}${fmtUsd(c.profit)} usd`)
+    + (c.durationMs != null ? kvRow('Duration', `${c.durationMs}ms`) : '')
+    + `</div>` + legs;
+}
+
+function viewStatus() {
+  const today = inRange(startOfDay(0), startOfDay(0) + DAY);
+  const s = stats(today, 1);
+  const last = DATA.cycles[0];
+  const current = last ? last.balanceAfter : DATA.capital;
+  return (LOAD_FAILED ? errBox : '')
+    + `<h2>Status</h2><div class="kv">`
+    + kvRow('Engine', `<span class="status-dot"></span>Running`)
+    + kvRow('Last Cycle', last ? new Date(last.ts).toLocaleString() : '—')
+    + kvRow('Cycles Today', s.n)
+    + kvRow('Profit Today', `${sq(s.profit >= 0 ? 'up' : 'down')}${fmtUsd(s.profit)} usd (${fmtPct(s.profitPct)})`)
+    + (current != null ? kvRow('Current Balance', `${fmtUsd(current)} usd`) : '')
+    + kvRow('Capital', `${fmtUsd(DATA.capital)} usd`)
+    + `</div>`;
+}
+
+/* ---------- router / events ---------- */
+
+function render() {
+  if (!DATA) return;
+  const hash = location.hash || '#/day';
+  let html;
+  const detail = hash.match(/^#\/cycle\/(\d+)$/);
+  if (detail) html = viewCycleDetail(detail[1]);
+  else if (hash === '#/status') html = viewStatus();
+  else if (hash === '#/week') html = viewWeek();
+  else if (hash === '#/cycles') html = viewCycles();
+  else html = viewDay();
+  document.getElementById('view').innerHTML = html;
+  document.querySelectorAll('.menu a').forEach(a =>
+    a.classList.toggle('current', a.getAttribute('href') === hash));
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('burger').addEventListener('click', e => {
+  const m = document.getElementById('menu');
+  m.hidden = !m.hidden;
+  e.currentTarget.setAttribute('aria-expanded', String(!m.hidden));
+});
+
+document.getElementById('menu').addEventListener('click', () => {
+  document.getElementById('menu').hidden = true;
+  document.getElementById('burger').setAttribute('aria-expanded', 'false');
+});
+
+document.getElementById('view').addEventListener('click', e => {
+  if (e.target.closest('#dlcsv')) { e.preventDefault(); downloadCsv(); return; }
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  if (b.dataset.act === 'day') state.dayIdx = +b.dataset.i;
+  else state.rangeIdx = +b.dataset.i;
+  render();
+});
+
+document.getElementById('view').addEventListener('change', e => {
+  const cb = e.target.closest('input[data-exch]');
+  if (!cb) return;
+  state.exch[cb.dataset.exch] = cb.checked;
+  render();
+});
+
+window.addEventListener('hashchange', render);
+
+/* Metric definition overlay */
+function showDef(label) {
+  const d = DEFS[label];
+  if (!d) return;
+  const scrim = document.createElement('div');
+  scrim.className = 'scrim';
+  scrim.innerHTML = `<div class="defcard"><h3>${esc(label)}</h3><p>${esc(d)}</p></div>`;
+  scrim.addEventListener('click', () => scrim.remove());
+  document.body.appendChild(scrim);
+}
+document.body.addEventListener('click', e => {
+  const b = e.target.closest('button.i');
+  if (b) { e.preventDefault(); e.stopPropagation(); showDef(b.dataset.def); }
+}, true);
+
+loadData().then(render);
+</script>
+</body>
+</html>
