@@ -101,7 +101,7 @@
   .card .num .b { font-size: 0.8rem; color: var(--ink-dim); white-space: nowrap; }
   .card .num .a.pos { color: var(--green-text); } .card .num .a.negv { color: var(--neg); } .card .num .a.dim { color: var(--ink-dim); font-weight: 500; }
   .sqi { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-left: 8px; vertical-align: 1px; }
-  .sqi.green { background: var(--green); } .sqi.red { background: var(--neg); }
+  .sqi.green { background: var(--green); } .sqi.red { background: var(--neg); } .sqi.grey { background: #c3c9d1; }
   .card .num .a.badge { padding: 5px 10px; border-radius: 8px; }
   .card .num .a.badge.green { background: var(--green-soft); color: var(--green-text); } .card .num .a.badge.red { background: var(--red-soft); color: var(--neg); }
   .datebox { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--card); border-radius: 12px; padding: 12px 14px; margin: -4px 0 16px; }
@@ -609,9 +609,10 @@ function viewWeek() {
   </div>`;
   const chart = days <= 30 ? `<h2>Daily profit</h2>` + barChart(daily.map(d => ({ label: days <= 14 ? fmtDay(d.f + DAY / 2).replace(/ \w+$/, '') : fmtDayShort(d.f + DAY / 2), value: d.v })), s.dailyAvg) : '';
   const rows = daily.slice().reverse();
-  const mob = `<div class="list mob">` + rows.map(d => card({ title: dayLabel(d.off), sub: `${d.n} cycles${d.bal != null ? ` · close ${money(d.bal)}` : ''}`, a: money(d.v, { plus: true }), b: 'profit', acls: d.v < 0 ? 'negv' : d.v < s.dailyAvg * 0.75 ? '' : 'pos' })).join('') + `</div>`;
+  const sqi = v => `<span class="sqi ${v > 0 ? 'green' : v < 0 ? 'red' : 'grey'}"></span>`;
+  const mob = `<div class="list mob">` + rows.map(d => card({ title: dayLabel(d.off), sub: `${d.n} cycles${d.bal != null ? ` · close ${money(d.bal)}` : ''}`, a: money(d.v, { plus: true }) + sqi(d.v), b: 'profit', acls: d.v < 0 ? 'negv' : d.v > 0 ? 'pos' : 'dim' })).join('') + `</div>`;
   const desk = `<div class="tblwrap desk"><table class="data"><thead><tr><th>Day</th><th class="r">Cycles</th><th class="r">${infoLabel('Profit')}</th><th class="r">${infoLabel('Balance')}</th></tr></thead><tbody>`
-    + rows.map(d => `<tr><td>${dayLabel(d.off)}</td><td class="r">${d.n}</td><td class="r ${d.v < 0 ? 'negv' : 'pos'}">${money(d.v, { plus: true })}</td><td class="r">${d.bal != null ? money(d.bal) : '—'}</td></tr>`).join('')
+    + rows.map(d => `<tr><td>${dayLabel(d.off)}</td><td class="r">${d.n}</td><td class="r ${d.v < 0 ? 'negv' : d.v > 0 ? 'pos' : 'dim'}">${money(d.v, { plus: true })}${sqi(d.v)}</td><td class="r">${d.bal != null ? money(d.bal) : '—'}</td></tr>`).join('')
     + `</tbody></table></div>`;
   return rail(RANGE_CHIPS, state.rangeIdx, 'range') + (LOAD_FAILED ? errBox : '')
     + `<div class="layout two"><div>${hero}${tiles}${chart}</div><div><h2>Day by day<span class="dim" style="font-size:.85rem;font-weight:500">balance now ${money(current)}</span></h2>${mob}${desk}</div></div>`;
