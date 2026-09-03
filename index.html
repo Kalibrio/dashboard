@@ -694,8 +694,9 @@ function viewCycleDetail(id) {
 
 const NAV = [['#/status', 'Today'], ['#/day', 'Day'], ['#/week', 'Week'], ['#/cycles', 'Cycles']];
 
-function render() {
+function render(opts = {}) {
   if (!DATA) return;
+  const keep = opts.keepScroll ? window.scrollY : null;
   const hash = location.hash || '#/status';
   let html, current = hash;
   const detail = hash.match(/^#\/cycle\/(\d+)$/);
@@ -708,6 +709,7 @@ function render() {
   document.querySelectorAll('nav.nav a').forEach(a => a.classList.toggle('current', a.getAttribute('href') === current));
   const clock = document.getElementById('clock');
   if (clock) clock.textContent = `${fmtDay(Date.now())} · ${fmtTime(Date.now())}`;
+  if (keep != null) { window.scrollTo(0, keep); return; }
   window.scrollTo(0, 0);
   document.querySelectorAll('nav.nav a.current, .chip.sel').forEach(el => { try { el.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch (e) {} });
   window.scrollTo(0, 0);
@@ -736,8 +738,18 @@ document.getElementById('view').addEventListener('click', e => {
   render();
 });
 
-window.addEventListener('hashchange', render);
-let resizeT; window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(render, 150); });
+window.addEventListener('hashchange', () => render());
+/* Re-render only when the width changes: phone browsers fire resize as their toolbar hides and shows while scrolling. */
+let resizeT, lastW = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (window.innerWidth === lastW) return;
+  clearTimeout(resizeT);
+  resizeT = setTimeout(() => {
+    const narrowChanged = (lastW < 640) !== (window.innerWidth < 640);
+    lastW = window.innerWidth;
+    if (narrowChanged) render({ keepScroll: true });
+  }, 150);
+});
 
 /* Metric definition overlay */
 function showDef(label) {
