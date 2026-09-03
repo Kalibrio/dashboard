@@ -465,16 +465,17 @@ function rail(items, selIdx, act) {
     `<button class="chip${i === selIdx ? ' sel' : ''}" data-act="${act}" data-i="${i}">${t}</button>`).join('') + `</div>`;
 }
 
-function cycleCard(c, { showDay = false, badge = '' } = {}) {
+const sqi = v => `<span class="sqi ${v > 0 ? 'green' : v < 0 ? 'red' : 'grey'}"></span>`;
+function cycleCard(c, { showDay = false, badge = '', sq = false } = {}) {
   const pct = c.profit / c.amount * 100;
   return card({ href: `#/cycle/${c.id}`, title: cyclePath(c.cycle),
     sub: `${showDay ? fmtDayShort(c.ts) + ' ' : ''}${fmtTime(c.ts)}${c.exchange ? ` · ${esc(c.exchange)}` : ''} · ${money(c.amount)}${c.durationMs != null ? ` · ${dur(c.durationMs)}` : ''}`,
-    a: money(c.profit, { plus: true }), b: pct2(pct), acls: badge ? `badge ${badge}` : (c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim') });
+    a: money(c.profit, { plus: true }) + (sq ? sqi(c.profit) : ''), b: pct2(pct), acls: badge ? `badge ${badge}` : (c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim') });
 }
 
 function cycleRows(list, { showDay = false } = {}) {
   if (!list.length) return `<div class="list">${card({ title: 'No cycles', sub: '' })}</div>`;
-  const mob = `<div class="list mob">` + list.map(c => cycleCard(c, { showDay })).join('') + `</div>`;
+  const mob = `<div class="list mob">` + list.map(c => cycleCard(c, { showDay, sq: true })).join('') + `</div>`;
   const desk = `<div class="tblwrap desk"><table class="data">
     <thead><tr>${['Time', 'Cycle', 'Exchange', 'Amount', 'Profit Expected (%)', 'Profit Actual (%)', 'Profit', 'Duration', 'Id'].map((h, i) => `<th class="${i >= 3 && i <= 7 ? 'r' : ''}">${infoLabel(h)}</th>`).join('')}</tr></thead>
     <tbody>` + list.map(c => `<tr>
@@ -484,7 +485,7 @@ function cycleRows(list, { showDay = false } = {}) {
       <td class="r">${money(c.amount)}</td>
       <td class="r dim">${c.expectedPct != null ? pct2(c.expectedPct) : '—'}</td>
       <td class="r">${pct2(c.profit / c.amount * 100)}</td>
-      <td class="r ${c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim'}">${money(c.profit, { plus: true })}</td>
+      <td class="r ${c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim'}">${money(c.profit, { plus: true })}${sqi(c.profit)}</td>
       <td class="r">${dur(c.durationMs)}</td>
       <td><a href="#/cycle/${c.id}">${c.id}</a></td>
     </tr>`).join('') + `</tbody></table></div>`;
@@ -609,7 +610,6 @@ function viewWeek() {
   </div>`;
   const chart = days <= 30 ? `<h2>Daily profit</h2>` + barChart(daily.map(d => ({ label: days <= 14 ? fmtDay(d.f + DAY / 2).replace(/ \w+$/, '') : fmtDayShort(d.f + DAY / 2), value: d.v })), s.dailyAvg) : '';
   const rows = daily.slice().reverse();
-  const sqi = v => `<span class="sqi ${v > 0 ? 'green' : v < 0 ? 'red' : 'grey'}"></span>`;
   const mob = `<div class="list mob">` + rows.map(d => card({ title: dayLabel(d.off), sub: `${d.n} cycles${d.bal != null ? ` · close ${money(d.bal)}` : ''}`, a: money(d.v, { plus: true }) + sqi(d.v), b: 'profit', acls: d.v < 0 ? 'negv' : d.v > 0 ? 'pos' : 'dim' })).join('') + `</div>`;
   const desk = `<div class="tblwrap desk"><table class="data"><thead><tr><th>Day</th><th class="r">Cycles</th><th class="r">${infoLabel('Profit')}</th><th class="r">${infoLabel('Balance')}</th></tr></thead><tbody>`
     + rows.map(d => `<tr><td>${dayLabel(d.off)}</td><td class="r">${d.n}</td><td class="r ${d.v < 0 ? 'negv' : d.v > 0 ? 'pos' : 'dim'}">${money(d.v, { plus: true })}${sqi(d.v)}</td><td class="r">${d.bal != null ? money(d.bal) : '—'}</td></tr>`).join('')
