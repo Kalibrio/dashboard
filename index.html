@@ -99,6 +99,7 @@
   .card .num { text-align: right; display: flex; flex-direction: column; gap: 1px; align-items: flex-end; flex: none; }
   .card .num .a { color: var(--ink-strong); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .card .num .b { font-size: 0.8rem; color: var(--ink-dim); white-space: nowrap; }
+  .card .num .a.pos { color: var(--green-text); } .card .num .a.negv { color: var(--neg); } .card .num .a.dim { color: var(--ink-dim); font-weight: 500; }
   .pos { color: var(--green-text); font-weight: 600; } .negv { color: var(--neg); font-weight: 600; } .dim { color: var(--ink-dim); }
   .chev { width: 8px; height: 8px; border-right: 2px solid #c3c9d1; border-bottom: 2px solid #c3c9d1; transform: rotate(-45deg); flex: none; margin-right: 4px; }
   .win { background: var(--green-soft); border-radius: 12px; padding: 14px 16px; margin: 16px 0 0; display: flex; flex-direction: column; gap: 4px; }
@@ -386,8 +387,9 @@ function ago(ts) {
   if (m < 1) return 'just now';
   if (m < 60) return `${m} min ago`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h} h ago`;
-  return `${Math.floor(h / 24)} d ago`;
+  if (h < 24) return `${h} hour${h === 1 ? '' : 's'} ago`;
+  const d = Math.floor(h / 24);
+  return `${d} day${d === 1 ? '' : 's'} ago`;
 }
 function startOfDay(offset) {
   const d = new Date(); d.setHours(0, 0, 0, 0);
@@ -457,7 +459,7 @@ function cycleCard(c, { showDay = false } = {}) {
   const pct = c.profit / c.amount * 100;
   return card({ href: `#/cycle/${c.id}`, title: cyclePath(c.cycle),
     sub: `${showDay ? fmtDayShort(c.ts) + ' ' : ''}${fmtTime(c.ts)}${c.exchange ? ` · ${esc(c.exchange)}` : ''} · ${money(c.amount)}${c.durationMs != null ? ` · ${dur(c.durationMs)}` : ''}`,
-    a: money(c.profit, { plus: true }), b: pct2(pct), acls: c.profit >= 0 ? 'pos' : 'negv' });
+    a: money(c.profit, { plus: true }), b: pct2(pct), acls: c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim' });
 }
 
 function cycleRows(list, { showDay = false } = {}) {
@@ -472,7 +474,7 @@ function cycleRows(list, { showDay = false } = {}) {
       <td class="r">${money(c.amount)}</td>
       <td class="r dim">${c.expectedPct != null ? pct2(c.expectedPct) : '—'}</td>
       <td class="r">${pct2(c.profit / c.amount * 100)}</td>
-      <td class="r ${c.profit >= 0 ? 'pos' : 'negv'}">${money(c.profit, { plus: true })}</td>
+      <td class="r ${c.profit > 0 ? 'pos' : c.profit < 0 ? 'negv' : 'dim'}">${money(c.profit, { plus: true })}</td>
       <td class="r">${dur(c.durationMs)}</td>
       <td><a href="#/cycle/${c.id}">${c.id}</a></td>
     </tr>`).join('') + `</tbody></table></div>`;
@@ -526,7 +528,7 @@ function viewStatus() {
   const avgCyclesByNow = s30.n / 30 * frac;
   const equity = d30.map(d => d.bal).filter(b => b != null).concat([current]);
 
-  const hero = `<p class="note" style="margin:0 0 10px"><span class="running"><span class="status-dot"></span>Running</span>${last ? ` · last cycle ${fmtTime(last.ts)} · ${ago(last.ts)}` : ''}</p><div class="eyebrow">${infoLabel('Balance')}</div>
+  const hero = `<p class="note" style="margin:0 0 10px"><span class="running"><span class="status-dot"></span>Running</span>${last ? ` · <a href="#/cycle/${last.id}">Cycle #${last.id} · ${money(last.amount)} · ${ago(last.ts)}</a>` : ''}</p><div class="eyebrow">${infoLabel('Balance')}</div>
     <div class="hero"><div class="n">${money(current)}</div>
     <div class="pills"><span class="pill ${ret >= 0 ? 'green' : 'red'}">${ret >= 0 ? '+' : '−'}${Math.abs(ret).toFixed(1)}% on ${money(DATA.capital)} capital</span><span class="pill">${money(s.profit, { plus: true })} today</span></div></div>
     ${sparkline(equity)}<div class="axis"><span>30 days ago</span><span>now</span></div>`;
@@ -551,7 +553,7 @@ function viewDay() {
   const gains = list.filter(c => c.profit >= 0).sort((a, b) => b.profit - a.profit).slice(0, 5);
   const losses = list.filter(c => c.profit < 0).sort((a, b) => a.profit - b.profit).slice(0, 5);
 
-  const hero = `<div class="eyebrow">${dayLabel(idx)} · net profit</div>
+  const hero = `<div class="eyebrow">${dayLabel(idx)} · Total net profit</div>
     <div class="hero"><div class="n">${money(s.profit)}</div><div class="pills">${deltaPill(s.profit, avg, `vs 30-day avg ${money(avg)}`)}<span class="pill">${pct2(s.profitPct)} of capital</span></div></div>`;
   const tiles = `<div class="tiles">
     ${tile('Win rate', s.n ? pct0(s.winrate) : '—', { txt: `${s.wins} won · ${s.n - s.wins} lost` })}
